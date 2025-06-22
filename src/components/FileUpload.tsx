@@ -10,7 +10,7 @@ interface FileUploadProps {
     disabled?: boolean;
 }
 
-const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, disabled = false }) => {
+const FileUpload = ({ onFileSelect, disabled = false }: FileUploadProps) => {
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 

@@ -7,7 +7,7 @@ interface ImagePreviewProps {
     onRemove: () => void;
 }
 
-const ImagePreview: React.FC<ImagePreviewProps> = ({ imageUrl, onRemove }) => {
+const ImagePreview = ({ imageUrl, onRemove }: ImagePreviewProps) => {
     return (
         <div className="relative">
             <div className="max-h-[400px] overflow-hidden flex items-center justify-center rounded-lg shadow-md bg-gray-700">

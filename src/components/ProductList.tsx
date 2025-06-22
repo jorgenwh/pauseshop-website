@@ -9,7 +9,7 @@ interface ProductListProps {
   products: Product[];
 }
 
-const ProductList: React.FC<ProductListProps> = ({ products }) => {
+const ProductList = ({ products }: ProductListProps) => {
   if (products.length === 0) {
     return null;
   }

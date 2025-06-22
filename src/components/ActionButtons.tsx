@@ -9,7 +9,7 @@ interface ActionButtonsProps {
   isLoading: boolean;
 }
 
-const ActionButtons: React.FC<ActionButtonsProps> = ({ onCancel, onAnalyze, isLoading }) => {
+const ActionButtons = ({ onCancel, onAnalyze, isLoading }: ActionButtonsProps) => {
   return (
     <div className="flex justify-end space-x-3">
       <button

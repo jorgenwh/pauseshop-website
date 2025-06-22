@@ -12,7 +12,7 @@ import ActionButtons from '../components/ActionButtons';
 import useImageProcessing from '../hooks/useImageProcessing';
 import { TEXT } from '../lib/constants';
 
-const UploadPage: React.FC = () => {
+const UploadPage = () => {
     const {
         isLoading,
         error,

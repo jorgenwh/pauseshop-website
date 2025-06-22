@@ -3,7 +3,7 @@
  */
 import { COLORS, TIPS } from '../lib/constants';
 
-const TipsSection: React.FC = () => {
+const TipsSection = () => {
   return (
     <>
       {/* Best practices tips */}

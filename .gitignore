@@ -1,6 +1,7 @@
 dist/
 .git/
 .husky/
+auto-imports.d.ts
 
 # dependencies
 /node_modules

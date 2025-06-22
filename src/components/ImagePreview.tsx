@@ -10,11 +10,13 @@ interface ImagePreviewProps {
 const ImagePreview: React.FC<ImagePreviewProps> = ({ imageUrl, onRemove }) => {
   return (
     <div className="relative">
-      <img 
-        src={imageUrl} 
-        alt="Preview" 
-        className="max-w-full h-auto rounded-lg shadow-md" 
-      />
+      <div className="max-h-[400px] overflow-hidden flex items-center justify-center rounded-lg shadow-md bg-gray-700">
+        <img 
+          src={imageUrl} 
+          alt="Preview" 
+          className="max-w-full max-h-[400px] object-contain" 
+        />
+      </div>
       <button
         onClick={onRemove}
         className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"

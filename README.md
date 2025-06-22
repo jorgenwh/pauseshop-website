@@ -1,72 +1,72 @@
-# PauseShop Website
+## React-ts Starter
 
-This repository contains the website for the PauseShop Chrome extension. The website is built using React, TypeScript, and Tailwind CSS.
+#### This is a simple starter for a React project with TypeScript and vite. It includes a basic setup for a React project with TypeScript, ESLint, Prettier, shadcn/ui. and many more. This could be your perfect starter templates to initialize your new React project. you don't have to waste time in configuring everything. setup your project with this template withing a minute.
 
-## About PauseShop
+#### Don't forget to give a ⭐ `star` if you like it. and feel to contribute. Thank you.
 
-PauseShop is a Chrome extension designed to help users make more mindful purchasing decisions by providing a moment of pause before completing a purchase. The extension aims to reduce impulse buying and promote thoughtful consumption.
+### Features
 
-## Tech Stack
+- Tailwindcss, shadcn-ui with Typescript configured
+- igniting vite with powerful plugins
+- husky hooks setup for pre-commit
+- docker setup
+- eslint, prettier setup for code formatting
+- standard folder structure
+- Custom import aliases (Example: @/components )
+- dependabot to keep notify to update dependencies
+- perfect workspace settings for single or team project.
 
-- **React**: Frontend library for building user interfaces
-- **TypeScript**: Typed superset of JavaScript for better code quality and developer experience
-- **Tailwind CSS**: Utility-first CSS framework for rapid UI development
-- **Google Cloud**: Hosting platform for the website
+## Vite Plugins That you must need to know for this starter.
 
-## Project Structure
+### vite-plugin-svgr
 
-```
-src/
-├── assets/        # Static assets like images, fonts, etc.
-├── components/    # Reusable UI components
-├── hooks/         # Custom React hooks
-├── pages/         # Page components for different routes
-├── services/      # API and other service functions
-├── types/         # TypeScript type definitions
-└── utils/         # Utility functions
-```
+This plugin is used to generate SVG images from React components. You can use this plugin in your project.
+Example:
 
-## Getting Started
+```javascript
+import Logo from "@/assets/react.svg?react";
+// just add ?react query to get the svg component
 
-### Prerequisites
-
-- Node.js (v14 or later)
-- npm or yarn
-
-### Installation
-
-1. Clone the repository:
-   ```
-   git clone https://github.com/yourusername/pauseshop-website.git
-   cd pauseshop-website
-   ```
-
-2. Install dependencies:
-   ```
-   npm install
-   ```
-
-3. Start the development server:
-   ```
-   npm start
-   ```
-
-4. Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-## Building for Production
-
-To build the app for production, run:
-
-```
-npm run build
+export const App = () => {
+    return (
+        <div {...props}>
+            <Logo />
+            {/* You can use svg components as like normal React components */}
+        </div>
+    );
+};
 ```
 
-This will create a `build` folder with optimized production files.
+### unplugin-fonts
 
-## Deployment
+This plugin is used to generate fonts from Google fonts. You can use this plugin in your project.
 
-The website will be deployed to Google Cloud Platform. Deployment instructions will be added soon.
+How to use ? Open `/config/fonts.config.ts` file and add your fonts like this: name should be exactly same as in Google fonts. If you wan to add custom fonts you can check their doc. [link](https://github.com/cssninjaStudio/unplugin-fonts#readme)
 
-## License
+```javascript
+{
+    name: 'Space Grotesk',
+    styles: 'wght@300;400;500;700',
+  },
+```
 
-[MIT](LICENSE)
+### unplugin-auto-import/vite
+
+This plugin is used to auto import modules. You can use this plugin in your project.
+auto-import will handle all imports like react, react-router and also shadcn-ui's component in your @component/ui folder , etc. and you can add more.
+
+Example:
+
+```javascript
+export function Counter() {
+    const [count, setCount] = useState(0); // no need to import react and react-router, auto-import will handle it
+    return (
+        <div>
+            <Button onClick={() => setCount(count + 1)}>Count: {count}</Button>
+            {/*  also,  Button from @/components/ui but you don't need to import it.  */}
+        </div>
+    );
+}
+```
+
+#### Note: If you need SEO or Server Side Rendering you can use Next.js, Nuxtjs, Remix, Astro Etc SSR based framework. This template is just for vite-react.

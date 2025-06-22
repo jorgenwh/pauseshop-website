@@ -1,7 +1,0 @@
-@import "tailwindcss";
-
-.App {
-    min-height: 100vh;
-    min-width: 100vw;
-    background-color: bg-red-100;
-}

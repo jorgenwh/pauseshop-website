@@ -10,19 +10,15 @@ import Fonts from "unplugin-fonts/vite";
 import imagemin from "unplugin-imagemin/vite";
 import { compression } from "vite-plugin-compression2";
 import Inspect from "vite-plugin-inspect";
-import svgr from "vite-plugin-svgr";
-
-import { fonts } from "./configs/fonts.config";
 
 export default defineConfig({
     plugins: [
-        svgr(),
         react(),
         Inspect(),
         compression(),
         imagemin(),
         tailwindcss(),
-        Fonts({ google: { families: fonts } }),
+        Fonts(),
         AutoImport({
             imports: ["react", "react-router"],
             dts: "./auto-imports.d.ts",

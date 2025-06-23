@@ -6,6 +6,7 @@ import { useState, useCallback, useRef } from 'react';
 import { analyzeImageStreaming, StreamingCallbacks } from '../../../lib/api/client';
 import { convertImageToBase64 } from '../../../lib/utils';
 import { Product } from '../../../lib/types';
+import { UPLOAD_CONFIG } from '../../../lib/constants';
 
 interface ImageProcessingState {
     isLoading: boolean;
@@ -75,8 +76,8 @@ export const useImageProcessing = () => {
         }));
 
         try {
-            // Convert the image to base64
-            const base64Image = await convertImageToBase64(state.selectedFile);
+            // Convert the image to base64 with size limit
+            const base64Image = await convertImageToBase64(state.selectedFile, UPLOAD_CONFIG.maxSizeMB);
 
             // Create a new AbortController for this request
             abortControllerRef.current = new AbortController();

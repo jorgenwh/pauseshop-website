@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Compression Test</title>
+</head>
+<body>
+    <h1>Image Compression Test</h1>
+    <input type="file" id="fileInput" accept="image/*">
+    <div id="results"></div>
+
+    <script>
+        // Copy the compression functions from utils.ts for testing
+        const getBase64SizeMB = (base64String) => {
+            const base64Data = base64String.split(',')[1] || base64String;
+            const sizeInBytes = (base64Data.length * 3) / 4;
+            return sizeInBytes / (1024 * 1024);
+        };
+
+        const compressImage = (img, maxSizeMB, maxWidth, maxHeight) => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            if (!ctx) {
+                throw new Error('Could not get canvas context');
+            }
+
+            let { width, height } = img;
+            
+            if (maxWidth && width > maxWidth) {
+                height = (height * maxWidth) / width;
+                width = maxWidth;
+            }
+            
+            if (maxHeight && height > maxHeight) {
+                width = (width * maxHeight) / height;
+                height = maxHeight;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            let quality = 0.9;
+            let dataUrl = canvas.toDataURL('image/jpeg', quality);
+            
+            while (getBase64SizeMB(dataUrl) > maxSizeMB && quality > 0.1) {
+                quality -= 0.1;
+                dataUrl = canvas.toDataURL('image/jpeg', quality);
+            }
+            
+            if (getBase64SizeMB(dataUrl) > maxSizeMB) {
+                const scaleFactor = 0.8;
+                canvas.width = width * scaleFactor;
+                canvas.height = height * scaleFactor;
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                
+                if (getBase64SizeMB(dataUrl) > maxSizeMB) {
+                    const tempImg = new Image();
+                    tempImg.src = dataUrl;
+                    return compressImage(tempImg, maxSizeMB, canvas.width * scaleFactor, canvas.height * scaleFactor);
+                }
+            }
+            
+            return dataUrl;
+        };
+
+        const convertImageToBase64 = (file, maxSizeMB = 10) => {
+            return new Promise((resolve, reject) => {
+                const fileSizeMB = file.size / (1024 * 1024);
+                
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const img = new Image();
+                    img.onload = () => {
+                        try {
+                            let dataUrl;
+                            
+                            if (fileSizeMB <= maxSizeMB) {
+                                const canvas = document.createElement('canvas');
+                                canvas.width = img.width;
+                                canvas.height = img.height;
+                                const ctx = canvas.getContext('2d');
+                                
+                                if (!ctx) {
+                                    throw new Error('Could not get canvas context');
+                                }
+                                
+                                ctx.drawImage(img, 0, 0);
+                                dataUrl = canvas.toDataURL('image/png');
+                                
+                                if (getBase64SizeMB(dataUrl) <= maxSizeMB) {
+                                    resolve(dataUrl);
+                                    return;
+                                }
+                            }
+                            
+                            dataUrl = compressImage(img, maxSizeMB);
+                            
+                            if (getBase64SizeMB(dataUrl) > maxSizeMB) {
+                                reject(new Error(`Image is too large. Please use an image smaller than ${maxSizeMB}MB.`));
+                                return;
+                            }
+                            
+                            resolve(dataUrl);
+                        } catch (error) {
+                            reject(error);
+                        }
+                    };
+                    img.onerror = () => reject(new Error('Failed to load image'));
+                    img.src = reader.result;
+                };
+                reader.onerror = () => reject(new Error('Failed to read file'));
+                reader.readAsDataURL(file);
+            });
+        };
+
+        document.getElementById('fileInput').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const results = document.getElementById('results');
+            const originalSizeMB = file.size / (1024 * 1024);
+            
+            results.innerHTML = `
+                <h3>Processing...</h3>
+                <p>Original file size: ${originalSizeMB.toFixed(2)}MB</p>
+            `;
+
+            try {
+                const base64 = await convertImageToBase64(file, 10);
+                const compressedSizeMB = getBase64SizeMB(base64);
+                
+                results.innerHTML = `
+                    <h3>Compression Results</h3>
+                    <p>Original file size: ${originalSizeMB.toFixed(2)}MB</p>
+                    <p>Compressed size: ${compressedSizeMB.toFixed(2)}MB</p>
+                    <p>Compression ratio: ${(originalSizeMB / compressedSizeMB).toFixed(2)}x</p>
+                    <p>Size reduction: ${((originalSizeMB - compressedSizeMB) / originalSizeMB * 100).toFixed(1)}%</p>
+                    <img src="${base64}" style="max-width: 300px; max-height: 300px;" alt="Compressed image">
+                `;
+            } catch (error) {
+                results.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        });
+    </script>
+</body>
+</html>

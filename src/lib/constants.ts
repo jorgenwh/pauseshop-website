@@ -49,7 +49,7 @@ export const TEXT = {
     uploadTitle: 'Upload an Image',
     dragDropText: 'Drag and drop an image, or click to browse',
     dragDropActive: 'Drop the image here',
-    fileTypeInfo: 'PNG and JPG/JPEG files only',
+    fileTypeInfo: 'PNG and JPG/JPEG files only (max 10MB)',
     analyzeButton: 'Analyze Image',
     processingText: 'Processing...',
     cancelButton: 'Cancel',

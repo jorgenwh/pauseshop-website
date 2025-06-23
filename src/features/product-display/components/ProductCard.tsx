@@ -39,7 +39,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
                 <div>
                     <h3 className="font-medium text-lg text-white">{product.name}</h3>
                     <p className="text-gray-300">
-                        {product.brand || TEXT.unknownBrand} • {product.category}
+                        {(product.brand && product.brand.toLowerCase() !== 'unknown') ? `${product.brand} • ` : ''}{product.category}
                     </p>
                 </div>
                 <div className={`${accuracyStyle.bgColor} ${accuracyStyle.textColor} border ${accuracyStyle.borderColor} px-3 py-2 rounded-lg flex items-center gap-2 min-w-[100px] justify-center`}>

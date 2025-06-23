@@ -4,14 +4,12 @@
  */
 
 // Server environment types
-export type ServerEnvironment = 'remote' | 'local' | 'mock';
+export type ServerEnvironment = 'remote' | 'local';
 
 // Server URLs for different environments
 export const SERVER_URLS = {
     remote: 'https://pauseshop-server-rfrxaro25a-uc.a.run.app',
-    local: 'http://localhost:3000',
-    // Add a mock server for development and testing
-    mock: '/api'
+    local: 'http://localhost:3000'
 };
 
 // Helper function to get base URL for the current environment

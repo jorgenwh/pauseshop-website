@@ -5,9 +5,9 @@
 import { Product } from "./types";
 
 /**
- * Converts an image file to a base64-encoded PNG string
+ * Converts an image file to a base64-encoded data URL string
  * @param file The image file to convert
- * @returns Promise resolving to the base64-encoded string (without data URL prefix)
+ * @returns Promise resolving to the complete data URL string
  */
 export const convertImageToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -20,9 +20,10 @@ export const convertImageToBase64 = (file: File): Promise<string> => {
                 canvas.height = img.height;
                 const ctx = canvas.getContext('2d');
                 ctx?.drawImage(img, 0, 0);
-                // Get base64 string without the data URL prefix
-                const base64String = canvas.toDataURL('image/png').split(',')[1];
-                resolve(base64String);
+                // Get the complete data URL string
+                const dataUrl = canvas.toDataURL('image/png');
+                console.log("Generated data URL format:", dataUrl.substring(0, 30) + "...");
+                resolve(dataUrl);
             };
             img.onerror = reject;
             img.src = reader.result as string;

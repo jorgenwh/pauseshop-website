@@ -92,10 +92,40 @@ export const useImageProcessing = () => {
                     }));
                 },
                 onError: (error: Event) => {
+                    // Check if it's a CustomEvent with detail
+                    const errorDetail = 'detail' in error ? (error as CustomEvent).detail : null;
+                    
+                    // Create user-friendly error messages based on error type
+                    let errorMessage = '';
+                    
+                    switch(error.type) {
+                        case 'image_error':
+                            errorMessage = `Image Error: The image format is not valid. Please make sure you're uploading a supported image format (PNG, JPG, JPEG, WebP).`;
+                            break;
+                        case 'processing_error':
+                            errorMessage = `Processing Error: There was a problem analyzing your image. Please try again with a clearer image.`;
+                            break;
+                        case 'rate_limit_error':
+                            errorMessage = `Rate Limit Exceeded: You've made too many requests. Please try again later.`;
+                            break;
+                        case 'connection_error':
+                            errorMessage = `Connection Error: Could not connect to the server. Please check your internet connection and try again.`;
+                            break;
+                        case 'stream_error':
+                            errorMessage = `Stream Error: The connection was interrupted. Please try again.`;
+                            break;
+                        default:
+                            errorMessage = errorDetail 
+                                ? `${error.type}: ${errorDetail}`
+                                : error.type || 'An error occurred during processing';
+                    }
+                    
+                    console.error('API Error:', error.type, errorDetail);
+                    
                     setState(prev => ({
                         ...prev,
                         isLoading: false,
-                        error: error.type || 'An error occurred during processing',
+                        error: errorMessage,
                     }));
                 },
             };

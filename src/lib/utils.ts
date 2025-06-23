@@ -22,7 +22,6 @@ export const convertImageToBase64 = (file: File): Promise<string> => {
                 ctx?.drawImage(img, 0, 0);
                 // Get the complete data URL string
                 const dataUrl = canvas.toDataURL('image/png');
-                console.log("Generated data URL format:", dataUrl.substring(0, 30) + "...");
                 resolve(dataUrl);
             };
             img.onerror = reject;

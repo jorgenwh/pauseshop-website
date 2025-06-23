@@ -120,7 +120,7 @@ export const useImageProcessing = () => {
                                 : error.type || 'An error occurred during processing';
                     }
                     
-                    console.error('API Error:', error.type, errorDetail);
+                    // Error is already handled by displaying it to the user
                     
                     setState(prev => ({
                         ...prev,

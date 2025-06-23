@@ -1,7 +1,7 @@
 /**
  * Component for action buttons (cancel and analyze)
  */
-import { TEXT } from '../lib/constants';
+import { TEXT } from '../../lib/constants';
 
 interface ActionButtonsProps {
   onCancel: () => void;

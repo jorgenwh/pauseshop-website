@@ -3,13 +3,15 @@
  * Handles file upload and image processing
  */
 
-import FileUpload from '../components/FileUpload';
-import ImagePreview from '../components/ImagePreview';
-import TipsSection from '../components/TipsSection';
-import ProductList from '../components/ProductList';
-import ErrorMessage from '../components/ErrorMessage';
-import ActionButtons from '../components/ActionButtons';
-import useImageProcessing from '../hooks/useImageProcessing';
+// Import from features
+import { FileUpload, ImagePreview, TipsSection, useImageProcessing } from '../features/image-upload';
+import { ProductList } from '../features/product-display';
+
+// Import from shared components
+import { ErrorMessage } from '../components/feedback';
+import { ActionButtons } from '../components/ui';
+
+// Import constants
 import { TEXT } from '../lib/constants';
 
 const UploadPage = () => {
@@ -49,10 +51,10 @@ const UploadPage = () => {
                     <div className="space-y-4">
                         <ImagePreview imageUrl={previewUrl} onRemove={reset} />
 
-                        <ActionButtons 
-                            onCancel={reset} 
-                            onAnalyze={handleUpload} 
-                            isLoading={isLoading} 
+                        <ActionButtons
+                            onCancel={reset}
+                            onAnalyze={handleUpload}
+                            isLoading={isLoading}
                         />
                     </div>
                 )}

@@ -1,9 +1,9 @@
 /**
  * Component for displaying a list of products
  */
-import { Product } from '../lib/types';
+import { Product } from '../../../lib/types';
 import ProductCard from './ProductCard';
-import { TEXT } from '../lib/constants';
+import { TEXT } from '../../../lib/constants';
 
 interface ProductListProps {
   products: Product[];

@@ -3,8 +3,8 @@
  * Handles HTTP requests to the backend server
  */
 
-import { Product } from "./types";
-import { getEndpointUrl } from "./server-config";
+import { Product } from "../types";
+import { getEndpointUrl } from "./endpoints";
 
 interface AnalyzeRequest {
     image: string;

@@ -1,9 +1,9 @@
 /**
  * Component for displaying a product card
  */
-import { Product } from '../lib/types';
-import { constructAmazonSearchUrl } from '../lib/utils';
-import { TEXT } from '../lib/constants';
+import { Product } from '../../../lib/types';
+import { constructAmazonSearchUrl } from '../../../lib/utils';
+import { TEXT } from '../../../lib/constants';
 
 interface ProductCardProps {
   product: Product;

@@ -13,6 +13,7 @@ interface ImageProcessingState {
     products: Product[];
     selectedFile: File | null;
     previewUrl: string | null;
+    analysisCompleted: boolean;
 }
 
 export const useImageProcessing = () => {
@@ -22,6 +23,7 @@ export const useImageProcessing = () => {
         products: [],
         selectedFile: null,
         previewUrl: null,
+        analysisCompleted: false,
     });
 
     const abortControllerRef = useRef<AbortController | null>(null);
@@ -36,6 +38,7 @@ export const useImageProcessing = () => {
             selectedFile: file,
             previewUrl,
             error: null,
+            analysisCompleted: false,
         }));
 
         return previewUrl;
@@ -68,6 +71,7 @@ export const useImageProcessing = () => {
             isLoading: true,
             error: null,
             products: [],
+            analysisCompleted: false,
         }));
 
         try {
@@ -89,6 +93,7 @@ export const useImageProcessing = () => {
                     setState(prev => ({
                         ...prev,
                         isLoading: false,
+                        analysisCompleted: true,
                     }));
                 },
                 onError: (error: Event) => {
@@ -169,6 +174,7 @@ export const useImageProcessing = () => {
             products: [],
             selectedFile: null,
             previewUrl: null,
+            analysisCompleted: false,
         });
     }, [cancelProcessing, clearPreview]);
 

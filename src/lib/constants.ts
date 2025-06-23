@@ -58,6 +58,13 @@ export const TEXT = {
     productsFoundText: (count: number) => `${count} product${count !== 1 ? 's' : ''} found`,
     amazonLinkText: 'Find on Amazon',
     unknownBrand: 'Unknown brand',
+    // Results page text
+    resultsDescription: 'Here are the products we found in your image. Click on any product to find it on Amazon.',
+    uploadedImage: 'Uploaded Image',
+    newSearchButton: 'New Search',
+    noProductsFound: 'No products were found in this image.',
+    tryAnotherImage: 'Try Another Image',
+    productsFoundSummary: (count: number) => `${count === 1 ? 'product' : 'products'} found in your image`,
 };
 
 // Tips content

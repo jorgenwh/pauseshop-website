@@ -19,6 +19,8 @@ export interface StreamingCallbacks {
     onError: (error: Event) => void;
 }
 
+// Original code without server connection test
+
 /**
  * Sends image data to the server for streaming analysis
  * Uses a workaround to send POST data with EventSource by first initiating the stream
@@ -31,11 +33,9 @@ export const analyzeImageStreaming = async (
     // Get the endpoint URL using the server-config helper
     const url = getEndpointUrl('/analyze/stream');
 
-    const request: AnalyzeRequest = {
-        image: imageData,
-        metadata: {
-            timestamp: new Date().toISOString(),
-        },
+    // Simplify the request to match exactly what the server expects
+    const request = {
+        image: imageData
     };
 
     try {
@@ -69,7 +69,6 @@ export const analyzeImageStreaming = async (
                 do {
                     // Check if aborted
                     if (signal?.aborted) {
-                        console.log(`Streaming aborted - cancelling reader`);
                         reader.cancel();
                         throw new DOMException('Operation aborted', 'AbortError');
                     }
@@ -80,13 +79,16 @@ export const analyzeImageStreaming = async (
                     if (done) {
                         callbacks.onComplete();
                     } else {
-                        buffer += decoder.decode(value, { stream: true });
+                        const chunk = decoder.decode(value, { stream: true });
+                        buffer += chunk;
                         const lines = buffer.split("\n");
                         buffer = lines.pop() || ""; // Keep incomplete line in buffer
-
+                        
                         for (const line of lines) {
-                            if (line.trim() === "") continue;
-
+                            if (line.trim() === "") {
+                                continue;
+                            }
+                            
                             if (line.startsWith("event: ")) {
                                 continue;
                             }
@@ -118,18 +120,24 @@ export const analyzeImageStreaming = async (
                                         parsedData.code
                                     ) {
                                         // This is an error event
-                                        callbacks.onError(
-                                            new Event("server_error"),
-                                        );
+                                        // Create a more specific error type based on the error code
+                                        let errorType = "server_error";
+                                        if (parsedData.code === "INVALID_IMAGE") {
+                                            errorType = "image_error";
+                                        } else if (parsedData.code === "PROCESSING_ERROR") {
+                                            errorType = "processing_error";
+                                        } else if (parsedData.code === "RATE_LIMIT_EXCEEDED") {
+                                            errorType = "rate_limit_error";
+                                        }
+                                        
+                                        const errorEvent = new CustomEvent(errorType, {
+                                            detail: `${parsedData.code}: ${parsedData.message}`
+                                        });
+                                        callbacks.onError(errorEvent);
                                         return;
                                     }
                                 } catch (parseError) {
-                                    console.error(
-                                        "Error parsing streaming data:",
-                                        parseError,
-                                        "Data:",
-                                        data,
-                                    );
+                                    // Silent fail for parse errors
                                 }
                             }
                         }
@@ -138,10 +146,8 @@ export const analyzeImageStreaming = async (
             } catch (error) {
                 // Re-throw AbortError
                 if (error instanceof Error && error.name === 'AbortError') {
-                    console.warn(`Stream reading aborted`);
                     throw error;
                 }
-                console.error("Error reading stream:", error);
                 callbacks.onError(new Event("stream_error"));
             }
         };
@@ -150,13 +156,9 @@ export const analyzeImageStreaming = async (
     } catch (error) {
         // Re-throw AbortError to be handled by the caller
         if (error instanceof Error && error.name === 'AbortError') {
-            console.warn(`Streaming analysis aborted during initialization`);
             throw error;
         }
-        console.error(
-            "Failed to start streaming analysis:",
-            error,
-        );
+        
         callbacks.onError(new Event("connection_error"));
     }
 };

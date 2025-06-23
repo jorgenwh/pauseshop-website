@@ -14,8 +14,9 @@ export const SERVER_URLS = {
 
 // Helper function to get base URL for the current environment
 export const getServerBaseUrl = (): string => {
-    // Use a default of 'remote' since we can't access import.meta.env
+    // Use the remote production server
     const serverEnv: ServerEnvironment = 'remote';
+    console.log(`Using server environment: ${serverEnv}`);
     return SERVER_URLS[serverEnv];
 };
 

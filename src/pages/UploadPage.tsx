@@ -3,9 +3,12 @@
  * Handles file upload and image processing
  */
 
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Product } from '../lib/types';
+
 // Import from features
-import { FileUpload, ImagePreview, TipsSection, useImageProcessing } from '../features/image-upload';
-import { ProductList } from '../features/product-display';
+import { FileUpload, ImagePreview, TipsSection } from '../features/image-upload';
 
 // Import from shared components
 import { ErrorMessage } from '../components/feedback';
@@ -14,16 +17,33 @@ import { ActionButtons } from '../components/ui';
 // Import constants
 import { TEXT } from '../lib/constants';
 
-const UploadPage = () => {
-    const {
-        isLoading,
-        error,
-        products,
-        previewUrl,
-        handleFileSelect,
-        processImage,
-        reset
-    } = useImageProcessing();
+interface UploadPageProps {
+    isLoading: boolean;
+    error: string | null;
+    products: Product[];
+    previewUrl: string | null;
+    handleFileSelect: (file: File) => string;
+    processImage: () => Promise<void>;
+    reset: () => void;
+}
+
+const UploadPage = ({
+    isLoading,
+    error,
+    products,
+    previewUrl,
+    handleFileSelect,
+    processImage,
+    reset
+}: UploadPageProps) => {
+    const navigate = useNavigate();
+
+    // Navigate to results page when products are loaded and not loading anymore
+    useEffect(() => {
+        if (products.length > 0 && !isLoading) {
+            navigate('/results');
+        }
+    }, [products, isLoading, navigate]);
 
     const handleUpload = async () => {
         await processImage();
@@ -61,8 +81,6 @@ const UploadPage = () => {
             </div>
 
             <ErrorMessage message={error} />
-
-            <ProductList products={products} />
         </div>
     );
 };

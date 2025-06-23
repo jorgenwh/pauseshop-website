@@ -58,6 +58,7 @@ export const TEXT = {
     productsFoundText: (count: number) => `${count} product${count !== 1 ? 's' : ''} found`,
     amazonLinkText: 'Find on Amazon',
     unknownBrand: 'Unknown brand',
+    accuracyLabel: 'Accuracy',
     // Results page text
     resultsDescription: 'Here are the products we found in your image. Click on any product to find it on Amazon.',
     uploadedImage: 'Uploaded Image',

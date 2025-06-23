@@ -33,8 +33,6 @@ export interface Product {
     iconCategory: string;
     category: Category;
     brand: string;
-    primaryColor: string;
-    secondaryColors: string[];
     features: string[];
     targetGender: TargetGender;
     searchTerms: string;

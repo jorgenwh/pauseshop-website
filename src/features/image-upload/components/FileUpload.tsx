@@ -30,11 +30,12 @@ const FileUpload = ({ onFileSelect, disabled = false }: FileUploadProps) => {
 
         if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
             const file = e.dataTransfer.files[0];
-            if (isImageFile(file)) {
-                onFileSelect(file);
-            } else {
+            if (!isImageFile(file)) {
                 alert('Please upload a PNG or JPG/JPEG file only.');
+                return;
             }
+            
+            onFileSelect(file);
         }
     }, [onFileSelect, disabled]);
 
@@ -44,11 +45,12 @@ const FileUpload = ({ onFileSelect, disabled = false }: FileUploadProps) => {
 
         if (e.target.files && e.target.files.length > 0) {
             const file = e.target.files[0];
-            if (isImageFile(file)) {
-                onFileSelect(file);
-            } else {
+            if (!isImageFile(file)) {
                 alert('Please upload a PNG or JPG/JPEG file only.');
+                return;
             }
+            
+            onFileSelect(file);
         }
     }, [onFileSelect, disabled]);
 
@@ -87,7 +89,7 @@ const FileUpload = ({ onFileSelect, disabled = false }: FileUploadProps) => {
                 <p className="text-lg font-medium text-gray-200">
                     {isDragging ? 'Drop the image here' : 'Drag and drop an image, or click to browse'}
                 </p>
-                <p className="text-sm text-gray-400 mt-2">PNG and JPG/JPEG files only</p>
+                <p className="text-sm text-gray-400 mt-2">PNG and JPG/JPEG files only (auto-compressed if needed)</p>
             </div>
         </div>
     );

@@ -5,7 +5,6 @@
 
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Product } from '../lib/types';
 
 // Import from features
 import { FileUpload, ImagePreview, TipsSection } from '../features/image-upload';
@@ -20,8 +19,8 @@ import { TEXT } from '../lib/constants';
 interface UploadPageProps {
     isLoading: boolean;
     error: string | null;
-    products: Product[];
     previewUrl: string | null;
+    analysisCompleted: boolean;
     handleFileSelect: (file: File) => string;
     processImage: () => Promise<void>;
     reset: () => void;
@@ -30,20 +29,20 @@ interface UploadPageProps {
 const UploadPage = ({
     isLoading,
     error,
-    products,
     previewUrl,
+    analysisCompleted,
     handleFileSelect,
     processImage,
     reset
 }: UploadPageProps) => {
     const navigate = useNavigate();
 
-    // Navigate to results page when products are loaded and not loading anymore
+    // Navigate to results page when analysis is completed (regardless of whether products were found)
     useEffect(() => {
-        if (products.length > 0 && !isLoading) {
+        if (analysisCompleted && !isLoading) {
             navigate('/results');
         }
-    }, [products, isLoading, navigate]);
+    }, [analysisCompleted, isLoading, navigate]);
 
     const handleUpload = async () => {
         await processImage();

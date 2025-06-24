@@ -10,7 +10,28 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({ product }: ProductCardProps) => {
-    const confidencePercentage = Math.round(product.confidence * 100);
+    const confidencePercentage = Math.round(product.confidence * 10);
+    
+    // Determine accuracy level and colors (server outputs only: 70, 80, 90, 100)
+    const getAccuracyStyle = (percentage: number) => {
+        if (percentage >= 90) {
+            // 90% and 100% - Highest accuracy
+            return {
+                bgColor: 'bg-emerald-500/20',
+                textColor: 'text-emerald-400',
+                borderColor: 'border-emerald-500/30'
+            };
+        } else {
+            // 70% and 80% - Good accuracy
+            return {
+                bgColor: 'bg-yellow-500/20',
+                textColor: 'text-yellow-400',
+                borderColor: 'border-yellow-500/30'
+            };
+        }
+    };
+
+    const accuracyStyle = getAccuracyStyle(confidencePercentage);
 
     return (
         <div className="border border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow bg-gray-700">
@@ -18,11 +39,17 @@ const ProductCard = ({ product }: ProductCardProps) => {
                 <div>
                     <h3 className="font-medium text-lg text-white">{product.name}</h3>
                     <p className="text-gray-300">
-                        {product.brand || TEXT.unknownBrand} • {product.category}
+                        {(product.brand && product.brand.toLowerCase() !== 'unknown') ? `${product.brand} • ` : ''}{product.category}
                     </p>
                 </div>
-                <div className="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-1 rounded-full">
-                    {confidencePercentage}%
+                <div className={`${accuracyStyle.bgColor} ${accuracyStyle.textColor} border ${accuracyStyle.borderColor} px-3 py-2 rounded-lg flex items-center gap-2 min-w-[100px] justify-center`}>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.236 4.53L7.53 10.53a.75.75 0 00-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
+                    </svg>
+                    <div className="text-center">
+                        <div className="text-xs font-medium opacity-75">{TEXT.accuracyLabel}</div>
+                        <div className="text-sm font-bold">{confidencePercentage}%</div>
+                    </div>
                 </div>
             </div>
 
@@ -32,12 +59,6 @@ const ProductCard = ({ product }: ProductCardProps) => {
                         {feature}
                     </span>
                 ))}
-                {product.primaryColor && (
-                    <span className="inline-block bg-gray-600 text-gray-200 text-xs px-2 py-1 rounded flex items-center">
-                        <div className="w-2 h-2 rounded-full mr-1" style={{ backgroundColor: product.primaryColor }}></div>
-                        {product.primaryColor}
-                    </span>
-                )}
             </div>
 
             <div className="mt-4 pt-3 border-t border-gray-600">

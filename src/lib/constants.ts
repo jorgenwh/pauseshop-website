@@ -49,7 +49,7 @@ export const TEXT = {
     uploadTitle: 'Upload an Image',
     dragDropText: 'Drag and drop an image, or click to browse',
     dragDropActive: 'Drop the image here',
-    fileTypeInfo: 'PNG and JPG/JPEG files only',
+    fileTypeInfo: 'PNG and JPG/JPEG files only (auto-compressed if needed)',
     analyzeButton: 'Analyze Image',
     processingText: 'Processing...',
     cancelButton: 'Cancel',
@@ -58,6 +58,7 @@ export const TEXT = {
     productsFoundText: (count: number) => `${count} product${count !== 1 ? 's' : ''} found`,
     amazonLinkText: 'Find on Amazon',
     unknownBrand: 'Unknown brand',
+    accuracyLabel: 'Accuracy',
     // Results page text
     resultsDescription: 'Here are the products we found in your image. Click on any product to find it on Amazon.',
     uploadedImage: 'Uploaded Image',

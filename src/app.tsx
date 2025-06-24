@@ -9,6 +9,7 @@ const App = () => {
         error,
         products,
         previewUrl,
+        analysisCompleted,
         handleFileSelect,
         processImage,
         reset
@@ -24,8 +25,8 @@ const App = () => {
                             <UploadPage 
                                 isLoading={isLoading}
                                 error={error}
-                                products={products}
                                 previewUrl={previewUrl}
+                                analysisCompleted={analysisCompleted}
                                 handleFileSelect={handleFileSelect}
                                 processImage={processImage}
                                 reset={reset}

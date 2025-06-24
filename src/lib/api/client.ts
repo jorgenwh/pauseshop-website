@@ -6,12 +6,6 @@
 import { Product } from "../types";
 import { getEndpointUrl } from "./endpoints";
 
-interface AnalyzeRequest {
-    image: string;
-    metadata?: {
-        timestamp: string;
-    };
-}
 
 export interface StreamingCallbacks {
     onProduct: (product: Product) => void;

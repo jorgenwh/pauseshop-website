@@ -6,6 +6,7 @@ import { useState, useCallback, useRef } from 'react';
 import { analyzeImageStreaming, StreamingCallbacks } from '../../../lib/api/client';
 import { convertImageToBase64 } from '../../../lib/utils';
 import { Product } from '../../../lib/types';
+import { UPLOAD_CONFIG } from '../../../lib/constants';
 
 interface ImageProcessingState {
     isLoading: boolean;
@@ -13,6 +14,7 @@ interface ImageProcessingState {
     products: Product[];
     selectedFile: File | null;
     previewUrl: string | null;
+    analysisCompleted: boolean;
 }
 
 export const useImageProcessing = () => {
@@ -22,6 +24,7 @@ export const useImageProcessing = () => {
         products: [],
         selectedFile: null,
         previewUrl: null,
+        analysisCompleted: false,
     });
 
     const abortControllerRef = useRef<AbortController | null>(null);
@@ -36,6 +39,7 @@ export const useImageProcessing = () => {
             selectedFile: file,
             previewUrl,
             error: null,
+            analysisCompleted: false,
         }));
 
         return previewUrl;
@@ -68,11 +72,12 @@ export const useImageProcessing = () => {
             isLoading: true,
             error: null,
             products: [],
+            analysisCompleted: false,
         }));
 
         try {
-            // Convert the image to base64
-            const base64Image = await convertImageToBase64(state.selectedFile);
+            // Convert the image to base64 with size limit
+            const base64Image = await convertImageToBase64(state.selectedFile, UPLOAD_CONFIG.maxSizeMB);
 
             // Create a new AbortController for this request
             abortControllerRef.current = new AbortController();
@@ -89,6 +94,7 @@ export const useImageProcessing = () => {
                     setState(prev => ({
                         ...prev,
                         isLoading: false,
+                        analysisCompleted: true,
                     }));
                 },
                 onError: (error: Event) => {
@@ -169,6 +175,7 @@ export const useImageProcessing = () => {
             products: [],
             selectedFile: null,
             previewUrl: null,
+            analysisCompleted: false,
         });
     }, [cancelProcessing, clearPreview]);
 

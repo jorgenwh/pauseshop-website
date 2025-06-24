@@ -1,6 +1,5 @@
 import { ChangeEvent, DragEvent, useCallback, useState } from 'react';
-import { isImageFile, validateFileSize } from '../../../lib/utils';
-import { UPLOAD_CONFIG } from '../../../lib/constants';
+import { isImageFile } from '../../../lib/utils';
 
 interface FileUploadProps {
     onFileSelect: (file: File) => void;
@@ -36,12 +35,6 @@ const FileUpload = ({ onFileSelect, disabled = false }: FileUploadProps) => {
                 return;
             }
             
-            const sizeValidation = validateFileSize(file, UPLOAD_CONFIG.maxSizeMB);
-            if (!sizeValidation.isValid) {
-                // Show warning but still allow upload (compression will handle it)
-                console.warn(sizeValidation.error);
-            }
-            
             onFileSelect(file);
         }
     }, [onFileSelect, disabled]);
@@ -55,12 +48,6 @@ const FileUpload = ({ onFileSelect, disabled = false }: FileUploadProps) => {
             if (!isImageFile(file)) {
                 alert('Please upload a PNG or JPG/JPEG file only.');
                 return;
-            }
-            
-            const sizeValidation = validateFileSize(file, UPLOAD_CONFIG.maxSizeMB);
-            if (!sizeValidation.isValid) {
-                // Show warning but still allow upload (compression will handle it)
-                console.warn(sizeValidation.error);
             }
             
             onFileSelect(file);
@@ -102,7 +89,7 @@ const FileUpload = ({ onFileSelect, disabled = false }: FileUploadProps) => {
                 <p className="text-lg font-medium text-gray-200">
                     {isDragging ? 'Drop the image here' : 'Drag and drop an image, or click to browse'}
                 </p>
-                <p className="text-sm text-gray-400 mt-2">PNG and JPG/JPEG files only (max {UPLOAD_CONFIG.maxSizeMB}MB)</p>
+                <p className="text-sm text-gray-400 mt-2">PNG and JPG/JPEG files only (auto-compressed if needed)</p>
             </div>
         </div>
     );

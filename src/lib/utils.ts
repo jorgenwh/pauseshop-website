@@ -5,138 +5,239 @@
 import { Product } from "./types";
 
 /**
- * Calculates the size of a base64 string in MB
- * @param base64String The base64 string to measure
- * @returns Size in MB
+ * Calculate base64 size more efficiently
  */
 const getBase64SizeMB = (base64String: string): number => {
-    // Remove data URL prefix if present
     const base64Data = base64String.split(',')[1] || base64String;
-    // Calculate size: base64 is ~4/3 the size of original data
-    const sizeInBytes = (base64Data.length * 3) / 4;
-    return sizeInBytes / (1024 * 1024);
+    return (base64Data.length * 0.75) / (1024 * 1024); // More efficient calculation
 };
 
 /**
- * Compresses an image to fit within size constraints
- * @param img The image element to compress
- * @param maxSizeMB Maximum size in MB
- * @param maxWidth Maximum width (optional)
- * @param maxHeight Maximum height (optional)
- * @returns Compressed image as base64 data URL
+ * Smart format selection based on image characteristics
  */
-const compressImage = (
-    img: HTMLImageElement, 
-    maxSizeMB: number, 
-    maxWidth?: number, 
-    maxHeight?: number
-): string => {
+const selectOptimalFormat = (img: HTMLImageElement): { format: string; quality: number } => {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
+    
+    if (!ctx) {
+        return { format: 'image/jpeg', quality: 0.8 };
+    }
+    
+    // Sample a small portion of the image to analyze
+    const sampleSize = 100;
+    canvas.width = sampleSize;
+    canvas.height = sampleSize;
+    ctx.drawImage(img, 0, 0, sampleSize, sampleSize);
+    
+    const imageData = ctx.getImageData(0, 0, sampleSize, sampleSize);
+    const data = imageData.data;
+    
+    let hasTransparency = false;
+    let colorVariance = 0;
+    let totalPixels = sampleSize * sampleSize;
+    
+    // Analyze image characteristics
+    for (let i = 0; i < data.length; i += 4) {
+        // Check for transparency
+        if (data[i + 3] < 255) {
+            hasTransparency = true;
+        }
+        
+        // Calculate color variance (simplified)
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const gray = (r + g + b) / 3;
+        colorVariance += Math.abs(r - gray) + Math.abs(g - gray) + Math.abs(b - gray);
+    }
+    
+    colorVariance /= totalPixels;
+    
+    // Select format based on characteristics
+    if (hasTransparency) {
+        return { format: 'image/png', quality: 1.0 };
+    } else if (colorVariance < 30) {
+        // Low color variance - PNG might be better
+        return { format: 'image/png', quality: 1.0 };
+    } else {
+        // High color variance - JPEG is better
+        return { format: 'image/jpeg', quality: 0.85 };
+    }
+};
+
+/**
+ * Progressive image compression with binary search for optimal quality
+ */
+const compressImageProgressive = (
+    img: HTMLImageElement,
+    maxSizeMB: number,
+    maxWidth = 2048,
+    maxHeight = 2048
+): string => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d', { 
+        alpha: false, // Disable alpha channel for JPEG
+        willReadFrequently: false // Optimize for single read
+    });
     
     if (!ctx) {
         throw new Error('Could not get canvas context');
     }
 
-    // Calculate new dimensions while maintaining aspect ratio
+    // Calculate optimal dimensions
     let { width, height } = img;
+    const aspectRatio = width / height;
     
-    // Apply max width/height constraints if provided
-    if (maxWidth && width > maxWidth) {
-        height = (height * maxWidth) / width;
+    // Reduce dimensions if too large
+    if (width > maxWidth) {
         width = maxWidth;
+        height = width / aspectRatio;
+    }
+    if (height > maxHeight) {
+        height = maxHeight;
+        width = height * aspectRatio;
     }
     
-    if (maxHeight && height > maxHeight) {
-        width = (width * maxHeight) / height;
-        height = maxHeight;
-    }
+    // Ensure dimensions are integers
+    width = Math.floor(width);
+    height = Math.floor(height);
 
     canvas.width = width;
     canvas.height = height;
     
-    // Draw the image on the canvas
+    // Use high-quality image rendering
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(img, 0, 0, width, height);
     
-    // Start with high quality and reduce if needed
-    let quality = 0.9;
-    let dataUrl = canvas.toDataURL('image/jpeg', quality);
+    // Binary search for optimal quality
+    let minQuality = 0.1;
+    let maxQuality = 0.95;
+    let bestDataUrl = '';
+    let bestSize = Infinity;
     
-    // Reduce quality until we're under the size limit
-    while (getBase64SizeMB(dataUrl) > maxSizeMB && quality > 0.1) {
-        quality -= 0.1;
-        dataUrl = canvas.toDataURL('image/jpeg', quality);
-    }
+    console.log(`🔍 Starting binary search compression (target: ${maxSizeMB}MB, dimensions: ${width}x${height})`);
     
-    // If still too large, try reducing dimensions
-    if (getBase64SizeMB(dataUrl) > maxSizeMB) {
-        const scaleFactor = 0.8;
-        canvas.width = width * scaleFactor;
-        canvas.height = height * scaleFactor;
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+    // Limit iterations to prevent infinite loops
+    for (let i = 0; i < 8; i++) {
+        const quality = (minQuality + maxQuality) / 2;
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        const size = getBase64SizeMB(dataUrl);
         
-        // Recursively reduce size if still too large
-        if (getBase64SizeMB(dataUrl) > maxSizeMB) {
-            // Create a new image element with the compressed data and try again
-            const tempImg = new Image();
-            tempImg.src = dataUrl;
-            return compressImage(tempImg, maxSizeMB, canvas.width * scaleFactor, canvas.height * scaleFactor);
+        console.log(`  🎯 Iteration ${i + 1}: quality=${quality.toFixed(2)}, size=${size.toFixed(2)}MB`);
+        
+        if (size <= maxSizeMB) {
+            bestDataUrl = dataUrl;
+            bestSize = size;
+            minQuality = quality; // Try higher quality
+        } else {
+            maxQuality = quality; // Reduce quality
+        }
+        
+        // If we found a good enough compression, break early
+        if (size <= maxSizeMB && size > maxSizeMB * 0.8) {
+            console.log(`  ✅ Found optimal compression early at iteration ${i + 1}`);
+            break;
         }
     }
     
-    return dataUrl;
+    // If binary search didn't work, try dimension reduction
+    if (bestSize > maxSizeMB) {
+        console.log(`📐 Binary search insufficient, reducing dimensions...`);
+        const scaleFactor = Math.sqrt(maxSizeMB / bestSize);
+        const newWidth = Math.floor(width * scaleFactor);
+        const newHeight = Math.floor(height * scaleFactor);
+        
+        console.log(`  📏 Scaling from ${width}x${height} to ${newWidth}x${newHeight} (factor: ${scaleFactor.toFixed(2)})`);
+        
+        canvas.width = newWidth;
+        canvas.height = newHeight;
+        ctx.drawImage(img, 0, 0, newWidth, newHeight);
+        bestDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        
+        console.log(`  📦 Final size after dimension reduction: ${getBase64SizeMB(bestDataUrl).toFixed(2)}MB`);
+    }
+    
+    return bestDataUrl;
 };
 
 /**
- * Converts an image file to a base64-encoded data URL string with size optimization
- * @param file The image file to convert
- * @param maxSizeMB Maximum size in MB (default: 10)
- * @returns Promise resolving to the complete data URL string
+ * Optimized image conversion with smart compression
  */
-export const convertImageToBase64 = (file: File, maxSizeMB: number = 10): Promise<string> => {
+export const convertImageToBase64 = (
+    file: File, 
+    maxSizeMB: number = 10
+): Promise<string> => {
     return new Promise((resolve, reject) => {
-        // Check initial file size
         const fileSizeMB = file.size / (1024 * 1024);
+        
+        // Early return for very small files
+        if (fileSizeMB < 0.1) {
+            console.log(`📸 Tiny image processed (no processing needed):
+              📁 Size: ${fileSizeMB.toFixed(3)}MB
+              ⚡ Skipped compression`);
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = () => reject(new Error('Failed to read file'));
+            reader.readAsDataURL(file);
+            return;
+        }
         
         const reader = new FileReader();
         reader.onload = () => {
             const img = new Image();
             img.onload = () => {
                 try {
-                    let dataUrl: string;
-                    
-                    // If the original file is small enough, try without compression first
-                    if (fileSizeMB <= maxSizeMB) {
+                    // For small files, try without compression first
+                    if (fileSizeMB <= maxSizeMB * 0.8) {
                         const canvas = document.createElement('canvas');
                         canvas.width = img.width;
                         canvas.height = img.height;
                         const ctx = canvas.getContext('2d');
                         
-                        if (!ctx) {
-                            throw new Error('Could not get canvas context');
-                        }
-                        
-                        ctx.drawImage(img, 0, 0);
-                        dataUrl = canvas.toDataURL('image/png');
-                        
-                        // Check if the base64 result is still under the limit
-                        if (getBase64SizeMB(dataUrl) <= maxSizeMB) {
-                            resolve(dataUrl);
-                            return;
+                        if (ctx) {
+                            ctx.drawImage(img, 0, 0);
+                            const { format, quality } = selectOptimalFormat(img);
+                            const dataUrl = canvas.toDataURL(format, quality);
+                            const finalSizeMB = getBase64SizeMB(dataUrl);
+                            
+                            if (finalSizeMB <= maxSizeMB) {
+                                console.log(`📸 Image processed (no compression needed):
+                                  📁 Original: ${fileSizeMB.toFixed(2)}MB
+                                  📦 Final: ${finalSizeMB.toFixed(2)}MB
+                                  🎯 Format: ${format}
+                                  ⚡ Quality: ${quality}`);
+                                resolve(dataUrl);
+                                return;
+                            }
                         }
                     }
                     
-                    // Compress the image if it's too large
-                    dataUrl = compressImage(img, maxSizeMB);
+                    // Use progressive compression for larger files
+                    const compressedDataUrl = compressImageProgressive(img, maxSizeMB);
+                    const finalSizeMB = getBase64SizeMB(compressedDataUrl);
                     
-                    // Final size check
-                    if (getBase64SizeMB(dataUrl) > maxSizeMB) {
-                        reject(new Error(`Image is too large. Please use an image smaller than ${maxSizeMB}MB.`));
+                    if (finalSizeMB > maxSizeMB) {
+                        console.error(`❌ Compression failed:
+                          📁 Original: ${fileSizeMB.toFixed(2)}MB
+                          📦 Final: ${finalSizeMB.toFixed(2)}MB
+                          🎯 Target: ${maxSizeMB}MB`);
+                        reject(new Error(`Unable to compress image below ${maxSizeMB}MB. Please use a smaller image.`));
                         return;
                     }
                     
-                    resolve(dataUrl);
+                    // Calculate compression statistics
+                    const compressionRatio = fileSizeMB / finalSizeMB;
+                    const sizeReduction = ((fileSizeMB - finalSizeMB) / fileSizeMB) * 100;
+                    
+                    console.log(`🗜️ Image compressed successfully:
+                      📁 Original: ${fileSizeMB.toFixed(2)}MB
+                      📦 Final: ${finalSizeMB.toFixed(2)}MB
+                      📊 Compression: ${compressionRatio.toFixed(1)}x smaller
+                      📉 Size reduction: ${sizeReduction.toFixed(1)}%
+                      🖼️ Dimensions: ${img.width}x${img.height}`);
+                    
+                    resolve(compressedDataUrl);
                 } catch (error) {
                     reject(error);
                 }
@@ -159,24 +260,6 @@ export const isImageFile = (file: File): boolean => {
     return allowedTypes.includes(file.type);
 };
 
-/**
- * Validates if a file size is within the allowed limit
- * @param file The file to validate
- * @param maxSizeMB Maximum size in MB
- * @returns Object with isValid boolean and error message if invalid
- */
-export const validateFileSize = (file: File, maxSizeMB: number): { isValid: boolean; error?: string } => {
-    const fileSizeMB = file.size / (1024 * 1024);
-    
-    if (fileSizeMB > maxSizeMB) {
-        return {
-            isValid: false,
-            error: `File size (${fileSizeMB.toFixed(1)}MB) exceeds the maximum limit of ${maxSizeMB}MB. The image will be automatically compressed during processing.`
-        };
-    }
-    
-    return { isValid: true };
-};
 
 /**
  * Constructs an Amazon search URL from a product's search terms or name

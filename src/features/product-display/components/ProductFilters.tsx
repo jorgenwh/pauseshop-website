@@ -4,6 +4,7 @@
 import { useMemo } from 'react';
 import { Product, Category } from '../../../lib/types';
 import { TEXT } from '../../../lib/constants';
+import { Button, Icon } from '../../../components/ui';
 
 interface ProductFiltersProps {
     products: Product[];
@@ -59,15 +60,15 @@ const ProductFilters = ({
                         <div className="flex items-center justify-center gap-3 mb-3">
                             <span className="text-sm text-gray-400">Filter by category:</span>
                             {selectedCategories.size > 0 && (
-                                <button
+                                <Button
                                     onClick={onClearFilters}
-                                    className="text-xs text-[#30B3A4] hover:text-[#30B3A4]/80 underline flex items-center gap-1"
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-xs underline"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
+                                    <Icon name="clear" size={12} className="mr-1" />
                                     Clear filters
-                                </button>
+                                </Button>
                             )}
                         </div>
                         <div className="flex flex-wrap justify-center gap-2">

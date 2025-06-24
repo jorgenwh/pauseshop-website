@@ -7,6 +7,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ImagePreview } from '../features/image-upload';
 import { ProductList, ProductFilters } from '../features/product-display';
+import { AppHeader, Card, Button, EmptyState } from '../components/ui';
 import { Product, Category } from '../lib/types';
 import { TEXT } from '../lib/constants';
 
@@ -69,13 +70,7 @@ const ResultsPage = ({ imageUrl, products, onReset }: ResultsPageProps) => {
 
     return (
         <div className={`container mx-auto px-4 py-8 max-w-5xl transition-opacity duration-500 ${animateIn ? 'opacity-100' : 'opacity-0'}`}>
-            <h1 className="text-4xl font-bold mb-2 text-center">
-                <span className="text-white">Pause</span>
-                <span className="text-[#30B3A4]">Shop</span>
-            </h1>
-            <p className="text-center text-gray-400 mb-8 max-w-lg mx-auto">
-                {TEXT.resultsDescription}
-            </p>
+            <AppHeader subtitle={TEXT.resultsDescription} className="mb-8" />
             
             {/* Product Filters */}
             <ProductFilters
@@ -88,16 +83,18 @@ const ResultsPage = ({ imageUrl, products, onReset }: ResultsPageProps) => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Left column - Image */}
                 <div className="md:col-span-1">
-                    <div className="bg-gray-800 rounded-lg shadow-md p-6 border border-gray-700 sticky top-4">
+                    <Card className="sticky top-4">
                         <h2 className="text-xl font-semibold mb-4 text-white">{TEXT.uploadedImage}</h2>
                         <ImagePreview imageUrl={imageUrl} onRemove={() => handleNewSearch()} />
-                        <button
+                        <Button
                             onClick={handleNewSearch}
-                            className="mt-4 w-full bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-md transition-colors"
+                            variant="secondary"
+                            fullWidth
+                            className="mt-4"
                         >
                             {TEXT.newSearchButton}
-                        </button>
-                    </div>
+                        </Button>
+                    </Card>
                 </div>
 
                 {/* Right column - Products */}
@@ -105,29 +102,25 @@ const ResultsPage = ({ imageUrl, products, onReset }: ResultsPageProps) => {
                     {filteredProducts.length > 0 ? (
                         <ProductList products={filteredProducts} />
                     ) : (
-                        <div className="bg-gray-800 rounded-lg shadow-md p-6 border border-gray-700 text-center">
+                        <Card>
                             {products.length === 0 ? (
-                                <>
-                                    <p className="text-gray-400 mb-4">{TEXT.noProductsFound}</p>
-                                    <button
-                                        onClick={handleNewSearch}
-                                        className="bg-[#30B3A4] hover:bg-[#2a9d8f] text-white py-2 px-4 rounded-md transition-colors"
-                                    >
-                                        {TEXT.tryAnotherImage}
-                                    </button>
-                                </>
+                                <EmptyState
+                                    title={TEXT.noProductsFound}
+                                    action={{
+                                        label: TEXT.tryAnotherImage,
+                                        onClick: handleNewSearch
+                                    }}
+                                />
                             ) : (
-                                <>
-                                    <p className="text-gray-400 mb-2">No products found for the selected categories.</p>
-                                    <button
-                                        onClick={clearFilters}
-                                        className="bg-[#30B3A4] hover:bg-[#2a9d8f] text-white py-2 px-4 rounded-md transition-colors"
-                                    >
-                                        Clear filters to see all products
-                                    </button>
-                                </>
+                                <EmptyState
+                                    title="No products found for the selected categories."
+                                    action={{
+                                        label: "Clear filters to see all products",
+                                        onClick: clearFilters
+                                    }}
+                                />
                             )}
-                        </div>
+                        </Card>
                     )}
                 </div>
             </div>

@@ -12,6 +12,11 @@ interface ProductCardProps {
 const ProductCard = ({ product }: ProductCardProps) => {
     const confidencePercentage = Math.round(product.confidence * 10);
     
+    // Format category name for display
+    const formatCategoryName = (category: string) => {
+        return category.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
+    };
+    
     // Determine accuracy level and colors (server outputs only: 70, 80, 90, 100)
     const getAccuracyStyle = (percentage: number) => {
         if (percentage >= 90) {
@@ -39,7 +44,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
                 <div>
                     <h3 className="font-medium text-lg text-white">{product.name}</h3>
                     <p className="text-gray-300">
-                        {(product.brand && product.brand.toLowerCase() !== 'unknown') ? `${product.brand} • ` : ''}{product.category}
+                        {(product.brand && product.brand.toLowerCase() !== 'unknown') ? `${product.brand} • ` : ''}{formatCategoryName(product.category)}
                     </p>
                 </div>
                 <div className={`${accuracyStyle.bgColor} ${accuracyStyle.textColor} border ${accuracyStyle.borderColor} px-3 py-2 rounded-lg flex items-center gap-2 min-w-[100px] justify-center`}>

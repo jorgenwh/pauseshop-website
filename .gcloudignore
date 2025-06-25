@@ -1,27 +1,4 @@
-# This file specifies files that are *not* uploaded to Google Cloud when
-# deploying your application. See `gcloud topic gcloudignore` for details.
-
-# Ignore the node_modules directory.
-node_modules/
-
-# Ignore Git repository files.
-.git/
-.gitignore
-
-# Ignore GitHub workflow files.
-.github/
-
-# Ignore source code and configuration files not needed for a static deployment.
-# The built 'dist' directory is what gets deployed.
-src/
-.husky/
-.prettierrc
-components.json
-index.html
-eslint.config.js
-package.json
-package-lock.json
-README.md
-tsconfig.json
-tsconfig.node.json
-vite.config.ts
+# Ignore everything by default.
+*.*
+!app.yaml
+!dist/

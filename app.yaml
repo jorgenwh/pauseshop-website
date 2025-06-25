@@ -7,13 +7,16 @@ handlers:
   # Serve static assets
   - url: /assets
     static_dir: dist/assets
+    secure: always
 
   # Serve other static files
   - url: /(.*\..+)$
     static_files: dist/\1
     upload: dist/.*\..+$
+    secure: always
 
   # Handle all other routes and serve the index.html file
   - url: /.*
     static_files: dist/index.html
     upload: dist/index.html
+    secure: always

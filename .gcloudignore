@@ -1,4 +1,8 @@
-# Ignore everything by default.
-*.*
+# Ignore everything
+**
+
+# Don't ignore app.yaml
 !app.yaml
-!dist/
+
+# Don't ignore the dist directory and its contents
+!dist/**

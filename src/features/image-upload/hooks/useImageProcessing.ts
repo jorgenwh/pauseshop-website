@@ -17,7 +17,21 @@ interface ImageProcessingState {
     analysisCompleted: boolean;
 }
 
-export const useImageProcessing = () => {
+interface UseImageProcessingReturn {
+    isLoading: boolean;
+    error: string | null;
+    products: Product[];
+    selectedFile: File | null;
+    previewUrl: string | null;
+    analysisCompleted: boolean;
+    handleFileSelect: (file: File) => string;
+    clearPreview: () => void;
+    processImage: () => Promise<void>;
+    cancelProcessing: () => void;
+    reset: () => void;
+}
+
+export const useImageProcessing = (): UseImageProcessingReturn => {
     const [state, setState] = useState<ImageProcessingState>({
         isLoading: false,
         error: null,
@@ -180,7 +194,12 @@ export const useImageProcessing = () => {
     }, [cancelProcessing, clearPreview]);
 
     return {
-        ...state,
+        isLoading: state.isLoading,
+        error: state.error,
+        products: state.products,
+        selectedFile: state.selectedFile,
+        previewUrl: state.previewUrl,
+        analysisCompleted: state.analysisCompleted,
         handleFileSelect,
         clearPreview,
         processImage,
@@ -188,5 +207,3 @@ export const useImageProcessing = () => {
         reset,
     };
 };
-
-export default useImageProcessing;

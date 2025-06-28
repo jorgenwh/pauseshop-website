@@ -14,8 +14,8 @@ export const SERVER_URLS = {
 
 // Helper function to get base URL for the current environment
 export const getServerBaseUrl = (): string => {
-    // Use the remote production server
-    const serverEnv: ServerEnvironment = 'remote';
+    // Get server environment from build-time variable, default to remote
+    const serverEnv: ServerEnvironment = (globalThis as any).__SERVER_ENV__ || 'remote';
     console.log(`Using server environment: ${serverEnv}`);
     return SERVER_URLS[serverEnv];
 };

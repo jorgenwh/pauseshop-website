@@ -4,7 +4,6 @@
  */
 
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { ImagePreview } from '../features/image-upload';
 import { ProductList } from '../features/product-display';
 import { AppHeader, Card, EmptyState } from '../components/ui';
@@ -14,10 +13,10 @@ import { TEXT } from '../lib/constants';
 interface ReferrerPageProps {
     imageUrl: string | null;
     products: Product[];
+    onReset: () => void;
 }
 
-const ReferrerPage = ({ imageUrl, products }: ReferrerPageProps) => {
-    const navigate = useNavigate();
+const ReferrerPage = ({ imageUrl, products, onReset: _onReset }: ReferrerPageProps) => {
     const [animateIn, setAnimateIn] = useState(false);
     const [loadingDots, setLoadingDots] = useState('.');
 

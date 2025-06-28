@@ -31,4 +31,7 @@ export default defineConfig({
             "@": path.resolve(__dirname, "./src"),
         },
     },
+    define: {
+        __SERVER_ENV__: JSON.stringify(process.env.SERVER_ENV || 'remote'),
+    },
 });

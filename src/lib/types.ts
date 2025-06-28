@@ -31,16 +31,14 @@ export enum TargetGender {
 export interface Product {
     name: string;
     iconCategory: string;
-    category: Category | string;
-    brand?: string;
-    features?: string[];
-    targetGender?: TargetGender;
-    searchTerms?: string;
-    confidence?: number;
-    price?: string;
-    productUrl?: string;
-    thumbnailUrl?: string;
-    amazonAsin?: string;
+    category: Category;
+    brand: string;
+    primaryColor: string;
+    secondaryColors: string[];
+    features: string[];
+    targetGender: TargetGender;
+    searchTerms: string;
+    confidence: number;
 }
 
 /**

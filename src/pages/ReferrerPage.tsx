@@ -6,12 +6,9 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ImagePreview } from '../features/image-upload';
-import { ProductList } from '../features/product-display';
 import { AppHeader, Card, EmptyState } from '../components/ui';
-import { Product, ReferrerData } from '../lib/types';
 import { TEXT } from '../lib/constants';
 import { getScreenshot } from '../lib/api';
-import { decodeReferrerData } from '../lib/referrer';
 
 interface ReferrerPageProps {
     onReset: () => void;
@@ -20,15 +17,13 @@ interface ReferrerPageProps {
 const ReferrerPage = ({ onReset: _onReset }: ReferrerPageProps) => {
     const [searchParams] = useSearchParams();
     const [imageUrl, setImageUrl] = useState<string | null>(null);
-    const [referrerData, setReferrerData] = useState<ReferrerData | null>(null);
     const [animateIn, setAnimateIn] = useState(false);
     const [loadingDots, setLoadingDots] = useState('.');
-
-    const [products, setProducts] = useState<Product[]>([]);
 
     useEffect(() => {
         const pauseId = searchParams.get('pauseId');
         const data = searchParams.get('data');
+        console.log(data);
 
         if (pauseId) {
             getScreenshot(pauseId).then(screenshotUrl => {
@@ -36,24 +31,6 @@ const ReferrerPage = ({ onReset: _onReset }: ReferrerPageProps) => {
                     setImageUrl(screenshotUrl);
                 }
             });
-        }
-
-        if (data) {
-            const decodedData = decodeReferrerData(data);
-            if (decodedData) {
-                setReferrerData(decodedData);
-                // Convert referrer products to display products
-                const displayProducts: Product[] = decodedData.products.map((product, index) => ({
-                    name: `Product ${index + 1}`, // We don't have the original product name in referrer data
-                    category: 'Unknown', // We don't have category in referrer data
-                    iconCategory: 'shopping', // Default icon
-                    price: product.price || 'Price not available',
-                    productUrl: product.amazonAsin ? `https://www.amazon.com/dp/${product.amazonAsin}` : '#',
-                    thumbnailUrl: product.thumbnailUrl || '',
-                    amazonAsin: product.amazonAsin || ''
-                }));
-                setProducts(displayProducts);
-            }
         }
     }, [searchParams]);
 
@@ -100,15 +77,11 @@ const ReferrerPage = ({ onReset: _onReset }: ReferrerPageProps) => {
 
                 {/* Right column - Products */}
                 <div className="md:col-span-2">
-                    {products.length > 0 ? (
-                        <ProductList products={products} />
-                    ) : (
-                        <Card>
-                            <EmptyState
-                                title={TEXT.noProductsFound}
-                            />
-                        </Card>
-                    )}
+                    <Card>
+                        <EmptyState
+                            title={TEXT.noProductsFound}
+                        />
+                    </Card>
                 </div>
             </div>
         </div>

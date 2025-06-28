@@ -1,0 +1,17 @@
+{
+  "name": "PauseShop",
+  "short_name": "PauseShop",
+  "description": "PauseShop - Your shopping companion",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/icons/icon-128-trim-color.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

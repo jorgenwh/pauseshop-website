@@ -272,3 +272,4 @@ export const constructAmazonSearchUrl = (product: Product): string => {
     const encodedName = encodeURIComponent(searchTerm);
     return `https://www.amazon.com/s?k=${encodedName}`;
 };
+

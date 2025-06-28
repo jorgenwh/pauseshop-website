@@ -33,7 +33,7 @@ export enum TargetGender {
 /**
  * Shared metadata about the identified product.
  */
-export interface ProductContext {
+export interface Product {
     name: string;
     iconCategory: string;
     category: Category;
@@ -62,7 +62,7 @@ export interface AmazonProduct {
  * This supports both the new fixed-length format and the legacy format.
  */
 export interface DecodedReferrerData {
-    productContext?: ProductContext; // Available in new format
+    product?: Product; // Available in new format
     clickedAmazonProduct: AmazonProduct;
     clickedPosition: number;
     amazonProducts: AmazonProduct[];

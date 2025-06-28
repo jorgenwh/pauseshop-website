@@ -5,7 +5,7 @@
 import {
     DecodedReferrerData,
     AmazonProduct,
-    ProductContext,
+    Product,
     Category,
     TargetGender,
     LegacyReferrerData,
@@ -53,8 +53,8 @@ function isLegacyFormat(encodedData: string): boolean {
 
 // --- Parsers for New Fixed-Length Format ---
 
-function parseProductContext(contextStr: string): ProductContext {
-    const parts = contextStr.split("~");
+function parseProductContext(productStr: string): Product {
+    const parts = productStr.split("~");
     return {
         name: parts[0] || "Unknown Product",
         iconCategory: parts[1] || "other",
@@ -91,10 +91,10 @@ function parseAmazonProduct(productStr: string): Omit<AmazonProduct, 'thumbnailU
 }
 
 function decodeFixedLengthData(encodedData: string): DecodedReferrerData | null {
-    const [productContextStr, amazonDataStr] = encodedData.split("||");
-    if (!productContextStr || !amazonDataStr) return null;
+    const [productStr, amazonDataStr] = encodedData.split("||");
+    if (!productStr || !amazonDataStr) return null;
 
-    const productContext = parseProductContext(productContextStr);
+    const product = parseProductContext(productStr);
     const amazonParts = amazonDataStr.split("|");
     const clickedPosition = parseInt(amazonParts[0], 10) || 0;
     const contextProductParts = amazonParts.slice(1);
@@ -116,7 +116,7 @@ function decodeFixedLengthData(encodedData: string): DecodedReferrerData | null 
     const clickedAmazonProduct = amazonProducts[clickedPosition] || amazonProducts[0];
 
     return {
-        productContext,
+        product,
         clickedAmazonProduct,
         clickedPosition,
         amazonProducts,

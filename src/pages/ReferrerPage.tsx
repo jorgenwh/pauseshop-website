@@ -6,12 +6,9 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ImagePreview } from '../features/image-upload';
-import { AppHeader, Card, EmptyState } from '../components/ui';
+import { AppHeader, Card } from '../components/ui';
 import { TEXT } from '../lib/constants';
 import { getScreenshot } from '../lib/api';
-import { decodeReferrerData } from '../lib/referrer';
-import { DecodedReferrerData } from '../lib/types';
-import { ProductList } from '../features/product-display';
 
 interface ReferrerPageProps {
     onReset: () => void;
@@ -20,18 +17,12 @@ interface ReferrerPageProps {
 const ReferrerPage = ({ onReset: _onReset }: ReferrerPageProps) => {
     const [searchParams] = useSearchParams();
     const [imageUrl, setImageUrl] = useState<string | null>(null);
-    const [decodedData, setDecodedData] = useState<DecodedReferrerData | null>(null);
     const [animateIn, setAnimateIn] = useState(false);
     const [loadingDots, setLoadingDots] = useState('.');
 
     useEffect(() => {
         const pauseId = searchParams.get('pauseId');
-        const data = searchParams.get('data');
-
-        if (data) {
-            const decoded = decodeReferrerData(data);
-            setDecodedData(decoded);
-        }
+        // const data = searchParams.get('data');
 
         if (pauseId) {
             getScreenshot(pauseId).then(screenshotUrl => {
@@ -77,17 +68,6 @@ const ReferrerPage = ({ onReset: _onReset }: ReferrerPageProps) => {
                 </div>
 
                 <div className="md:col-span-2">
-                    {decodedData && decodedData.amazonProducts.length > 0 ? (
-                        <ProductList
-                            products={decodedData.amazonProducts}
-                            productContext={decodedData.productContext}
-                            clickedPosition={decodedData.clickedPosition}
-                        />
-                    ) : (
-                        <Card>
-                            <EmptyState title={TEXT.noProductsFound} />
-                        </Card>
-                    )}
                 </div>
             </div>
         </div>

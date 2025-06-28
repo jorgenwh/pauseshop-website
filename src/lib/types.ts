@@ -31,10 +31,32 @@ export enum TargetGender {
 export interface Product {
     name: string;
     iconCategory: string;
-    category: Category;
-    brand: string;
-    features: string[];
-    targetGender: TargetGender;
-    searchTerms: string;
-    confidence: number;
+    category: Category | string;
+    brand?: string;
+    features?: string[];
+    targetGender?: TargetGender;
+    searchTerms?: string;
+    confidence?: number;
+    price?: string;
+    productUrl?: string;
+    thumbnailUrl?: string;
+    amazonAsin?: string;
+}
+
+/**
+ * Essential product data for referrer page (stripped down from AmazonScrapedProduct)
+ */
+export interface ReferrerProductData {
+    amazonAsin?: string;
+    thumbnailUrl: string;
+    price?: number;
+}
+
+/**
+ * Complete data package sent to referrer page
+ */
+export interface ReferrerData {
+    pauseId: string;
+    clickedPosition: number; // Index of clicked product in the products array
+    products: ReferrerProductData[]; // All scraped products for context
 }

@@ -48,8 +48,6 @@ const App = () => {
                         path="/referrer"
                         element={
                             <ReferrerPage
-                                imageUrl={previewUrl}
-                                products={products}
                                 onReset={reset}
                             />
                         }

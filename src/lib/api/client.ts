@@ -130,7 +130,7 @@ export const analyzeImageStreaming = async (
                                         callbacks.onError(errorEvent);
                                         return;
                                     }
-                                } catch (parseError) {
+                                } catch {
                                     // Silent fail for parse errors
                                 }
                             }

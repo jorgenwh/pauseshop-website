@@ -35,6 +35,14 @@ const ResultsPage = ({ imageUrl, products, onReset }: ResultsPageProps) => {
         }
     }, [imageUrl, navigate]);
 
+    // Filter products based on selected categories
+    const filteredProducts = useMemo(() => {
+        if (selectedCategories.size === 0) {
+            return products;
+        }
+        return products.filter(product => selectedCategories.has(product.category));
+    }, [products, selectedCategories]);
+
     const handleNewSearch = () => {
         onReset();
         navigate('/');
@@ -43,14 +51,6 @@ const ResultsPage = ({ imageUrl, products, onReset }: ResultsPageProps) => {
     if (!imageUrl) {
         return null;
     }
-
-    // Filter products based on selected categories
-    const filteredProducts = useMemo(() => {
-        if (selectedCategories.size === 0) {
-            return products;
-        }
-        return products.filter(product => selectedCategories.has(product.category));
-    }, [products, selectedCategories]);
 
     // Toggle category selection
     const toggleCategory = (category: Category) => {

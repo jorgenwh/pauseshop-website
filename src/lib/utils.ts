@@ -34,7 +34,7 @@ const selectOptimalFormat = (img: HTMLImageElement): { format: string; quality: 
     
     let hasTransparency = false;
     let colorVariance = 0;
-    let totalPixels = sampleSize * sampleSize;
+    const totalPixels = sampleSize * sampleSize;
     
     // Analyze image characteristics
     for (let i = 0; i < data.length; i += 4) {

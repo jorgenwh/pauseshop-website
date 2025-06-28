@@ -9,6 +9,8 @@ import { ImagePreview } from '../features/image-upload';
 import { AppHeader, Card } from '../components/ui';
 import { TEXT } from '../lib/constants';
 import { getScreenshot } from '../lib/api';
+import { decodeUrlData } from '@/lib/referrer';
+import { DecodedUrlData } from '@/lib/types';
 
 interface ReferrerPageProps {
     onReset: () => void;
@@ -19,10 +21,11 @@ const ReferrerPage = ({ onReset: _onReset }: ReferrerPageProps) => {
     const [imageUrl, setImageUrl] = useState<string | null>(null);
     const [animateIn, setAnimateIn] = useState(false);
     const [loadingDots, setLoadingDots] = useState('.');
+    const [, setData] = useState<DecodedUrlData | null>(null);
 
     useEffect(() => {
         const pauseId = searchParams.get('pauseId');
-        // const data = searchParams.get('data');
+        const data = searchParams.get('data');
 
         if (pauseId) {
             getScreenshot(pauseId).then(screenshotUrl => {
@@ -31,6 +34,16 @@ const ReferrerPage = ({ onReset: _onReset }: ReferrerPageProps) => {
                 }
             });
         }
+
+        if (data) {
+            const decodedData: DecodedUrlData | null = decodeUrlData(data);
+            if (decodedData) {
+                setData(decodedData);
+            } else {
+                console.error('Failed to decode URL data');
+            }
+        }
+
     }, [searchParams]);
 
     useEffect(() => {

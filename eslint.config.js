@@ -5,12 +5,11 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-    { ignores: ["dist", "dev-dist"] },
+    { ignores: ["dist", "dev-dist", "auto-imports.d.ts"] },
     {
         extends: [
             js.configs.recommended,
             ...tseslint.configs.recommended,
-            "./.eslintrc-auto-import.json",
         ],
         files: ["**/src/**/*.{ts,tsx}"],
         languageOptions: {
@@ -24,6 +23,10 @@ export default tseslint.config(
         rules: {
             ...reactHooks.configs.recommended.rules,
             "@typescript-eslint/no-empty-object-type": "off",
+            "@typescript-eslint/no-unused-vars": [
+                "error",
+                { "argsIgnorePattern": "^_" }
+            ],
             "react-refresh/only-export-components": [
                 "warn",
                 { allowConstantExport: true },

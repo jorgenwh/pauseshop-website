@@ -17,6 +17,7 @@ export const COLORS = {
     // Text colors
     textLight: 'text-white',
     textMuted: 'text-gray-400',
+    clickedItem: 'Clicked Item',
     textSubtle: 'text-gray-300',
 
     // UI element colors

@@ -6,29 +6,34 @@
  * Enum for product categories
  */
 export enum Category {
-    CLOTHING = "CLOTHING",
-    FOOTWEAR = "FOOTWEAR",
-    ACCESSORIES = "ACCESSORIES",
-    ELECTRONICS = "ELECTRONICS",
-    HOME_GOODS = "HOME_GOODS",
-    BEAUTY = "BEAUTY",
-    OTHER = "OTHER"
+    CLOTHING = "clothing",
+    ELECTRONICS = "electronics",
+    FURNITURE = "furniture",
+    ACCESSORIES = "accessories",
+    FOOTWEAR = "footwear",
+    HOME_DECOR = "home_decor",
+    BOOKS_MEDIA = "books_media",
+    SPORTS_FITNESS = "sports_fitness",
+    BEAUTY_PERSONAL_CARE = "beauty_personal_care",
+    KITCHEN_DINING = "kitchen_dining",
+    OTHER = "other",
 }
 
 /**
- * Enum for target gender
+ * Enum for target gender, aligned with the values used in encoding.
  */
 export enum TargetGender {
-    MALE = "MALE",
-    FEMALE = "FEMALE",
-    UNISEX = "UNISEX",
-    UNKNOWN = "UNKNOWN"
+    MEN = "men",
+    WOMEN = "women",
+    UNISEX = "unisex",
+    BOY = "boy",
+    GIRL = "girl",
 }
 
 /**
- * Product interface representing items identified by the AI
+ * Shared metadata about the identified product.
  */
-export interface Product {
+export interface ProductContext {
     name: string;
     iconCategory: string;
     category: Category;
@@ -42,19 +47,35 @@ export interface Product {
 }
 
 /**
- * Essential product data for referrer page (stripped down from AmazonScrapedProduct)
+ * Represents a single Amazon product parsed from the encoded data.
  */
-export interface ReferrerProductData {
+export interface AmazonProduct {
+    imageId: string;
     amazonAsin?: string;
-    thumbnailUrl: string;
     price?: number;
+    thumbnailUrl: string;
+    productUrl: string | null;
 }
 
 /**
- * Complete data package sent to referrer page
+ * Represents the fully decoded data from the referrer URL.
+ * This supports both the new fixed-length format and the legacy format.
  */
-export interface ReferrerData {
-    pauseId: string;
-    clickedPosition: number; // Index of clicked product in the products array
-    products: ReferrerProductData[]; // All scraped products for context
+export interface DecodedReferrerData {
+    productContext?: ProductContext; // Available in new format
+    clickedAmazonProduct: AmazonProduct;
+    clickedPosition: number;
+    amazonProducts: AmazonProduct[];
+}
+
+/**
+ * Legacy data structure for backward compatibility.
+ */
+export interface LegacyReferrerData {
+    c: number; // clickedPosition
+    p: {
+        i: string; // imageId
+        a?: string; // asin
+        pr?: number; // price
+    }[];
 }

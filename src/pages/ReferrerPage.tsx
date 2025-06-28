@@ -9,6 +9,9 @@ import { ImagePreview } from '../features/image-upload';
 import { AppHeader, Card, EmptyState } from '../components/ui';
 import { TEXT } from '../lib/constants';
 import { getScreenshot } from '../lib/api';
+import { decodeReferrerData } from '../lib/referrer';
+import { DecodedReferrerData } from '../lib/types';
+import { ProductList } from '../features/product-display';
 
 interface ReferrerPageProps {
     onReset: () => void;
@@ -17,13 +20,18 @@ interface ReferrerPageProps {
 const ReferrerPage = ({ onReset: _onReset }: ReferrerPageProps) => {
     const [searchParams] = useSearchParams();
     const [imageUrl, setImageUrl] = useState<string | null>(null);
+    const [decodedData, setDecodedData] = useState<DecodedReferrerData | null>(null);
     const [animateIn, setAnimateIn] = useState(false);
     const [loadingDots, setLoadingDots] = useState('.');
 
     useEffect(() => {
         const pauseId = searchParams.get('pauseId');
         const data = searchParams.get('data');
-        console.log(data);
+
+        if (data) {
+            const decoded = decodeReferrerData(data);
+            setDecodedData(decoded);
+        }
 
         if (pauseId) {
             getScreenshot(pauseId).then(screenshotUrl => {
@@ -34,19 +42,15 @@ const ReferrerPage = ({ onReset: _onReset }: ReferrerPageProps) => {
         }
     }, [searchParams]);
 
-    // Trigger animation after component mounts
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setAnimateIn(true);
-        }, 100);
+        const timer = setTimeout(() => setAnimateIn(true), 100);
         return () => clearTimeout(timer);
     }, []);
 
-    // Animate loading dots when no image
     useEffect(() => {
         if (!imageUrl) {
             const interval = setInterval(() => {
-                setLoadingDots(prev => prev === '...' ? '.' : prev + '.');
+                setLoadingDots(prev => (prev === '...' ? '.' : prev + '.'));
             }, 500);
             return () => clearInterval(interval);
         }
@@ -57,7 +61,6 @@ const ReferrerPage = ({ onReset: _onReset }: ReferrerPageProps) => {
             <AppHeader subtitle={TEXT.resultsDescription} className="mb-8" />
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Left column - Image */}
                 <div className="md:col-span-1">
                     <Card className="sticky top-4">
                         <h2 className="text-xl font-semibold mb-4 text-white">Pause Screenshot</h2>
@@ -66,22 +69,25 @@ const ReferrerPage = ({ onReset: _onReset }: ReferrerPageProps) => {
                         ) : (
                             <div className="max-h-[400px] overflow-hidden flex items-center justify-center rounded-lg shadow-md bg-gray-700 min-h-[200px]">
                                 <div className="text-center">
-                                    <div className="text-xl text-white font-semibold">
-                                        Loading{loadingDots}
-                                    </div>
+                                    <div className="text-xl text-white font-semibold">Loading{loadingDots}</div>
                                 </div>
                             </div>
                         )}
                     </Card>
                 </div>
 
-                {/* Right column - Products */}
                 <div className="md:col-span-2">
-                    <Card>
-                        <EmptyState
-                            title={TEXT.noProductsFound}
+                    {decodedData && decodedData.amazonProducts.length > 0 ? (
+                        <ProductList
+                            products={decodedData.amazonProducts}
+                            productContext={decodedData.productContext}
+                            clickedPosition={decodedData.clickedPosition}
                         />
-                    </Card>
+                    ) : (
+                        <Card>
+                            <EmptyState title={TEXT.noProductsFound} />
+                        </Card>
+                    )}
                 </div>
             </div>
         </div>

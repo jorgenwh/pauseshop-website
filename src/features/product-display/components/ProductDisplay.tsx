@@ -15,11 +15,11 @@ const ProductDisplay = ({ product, amazonProduct }: ProductDisplayProps) => {
         <Card className="flex flex-col lg:flex-row gap-6 p-6">
             {/* Product Thumbnail */}
             <div className="flex-shrink-0 lg:w-96">
-                <div className="relative overflow-hidden rounded-lg bg-gray-100 aspect-square group">
+                <div className="relative overflow-hidden rounded-lg bg-white aspect-square group">
                     <img
                         src={amazonProduct.thumbnailUrl}
                         alt={product?.name || 'Product'}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300"
                     />
                 </div>
             </div>

@@ -156,3 +156,30 @@ export const analyzeImageStreaming = async (
         callbacks.onError(new Event("connection_error"));
     }
 };
+
+/**
+ * Fetches a screenshot from the server using a session ID
+ */
+export const getScreenshot = async (sessionId: string): Promise<string | null> => {
+    const url = getEndpointUrl(`/session/${sessionId}/screenshot`);
+
+    try {
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            console.error(`Failed to fetch screenshot: ${response.status} ${response.statusText}`);
+            return null;
+        }
+
+        const data = await response.json();
+
+        if (data.success && data.screenshot) {
+            return data.screenshot;
+        }
+
+        return null;
+    } catch (error) {
+        console.error('Error fetching screenshot:', error);
+        return null;
+    }
+};

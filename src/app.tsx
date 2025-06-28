@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import UploadPage from './pages/UploadPage';
 import ResultsPage from './pages/ResultsPage';
+import ReferrerPage from './pages/ReferrerPage';
 import { useImageProcessing } from './features/image-upload';
 
 const App = () => {
@@ -20,9 +21,9 @@ const App = () => {
             <Router>
                 <Routes>
                     <Route 
-                        path="/" 
+                        path="/"
                         element={
-                            <UploadPage 
+                            <UploadPage
                                 isLoading={isLoading}
                                 error={error}
                                 previewUrl={previewUrl}
@@ -31,17 +32,25 @@ const App = () => {
                                 processImage={processImage}
                                 reset={reset}
                             />
-                        } 
+                        }
                     />
-                    <Route 
-                        path="/results" 
+                    <Route
+                        path="/results"
                         element={
-                            <ResultsPage 
+                            <ResultsPage
                                 imageUrl={previewUrl}
                                 products={products}
                                 onReset={reset}
                             />
                         } 
+                    />
+                    <Route
+                        path="/referrer"
+                        element={
+                            <ReferrerPage
+                                onReset={reset}
+                            />
+                        }
                     />
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>

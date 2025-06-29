@@ -104,6 +104,7 @@ const ReferrerPage = ({ onReset: _onReset }: ReferrerPageProps) => {
             // --- Attempt 1: Session-first ---
             const initialRequest: RankingRequest = {
                 productName: product.name,
+                category: product.category,
                 pauseId: pauseId ?? undefined,
                 thumbnails,
             };
@@ -117,6 +118,7 @@ const ReferrerPage = ({ onReset: _onReset }: ReferrerPageProps) => {
                         const originalImage = await urlToBase64(imageUrl);
                         const fallbackRequest: RankingRequest = {
                             productName: product.name,
+                            category: product.category,
                             originalImage,
                             thumbnails,
                         };

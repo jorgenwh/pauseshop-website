@@ -90,6 +90,7 @@ export interface ThumbnailData {
 
 export interface RankingRequest {
     productName: string;
+    category: Category;
     thumbnails: ThumbnailData[];
     originalImage?: string; // Fallback if session image fails
     pauseId?: string;       // Primary identifier for session image

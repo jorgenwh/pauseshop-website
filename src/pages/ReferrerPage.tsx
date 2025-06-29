@@ -32,6 +32,8 @@ const ReferrerPage = (_props: ReferrerPageProps) => {
     const [showDeepSearchView, setShowDeepSearchView] = useState(false);
     const [screenshotError, setScreenshotError] = useState<string | null>(null);
     const [deepSearchAttempted, setDeepSearchAttempted] = useState(false);
+    const [deepSearchStartTime, setDeepSearchStartTime] = useState<number | null>(null);
+    const [deepSearchResultsReady, setDeepSearchResultsReady] = useState(false);
 
     const pauseId = searchParams.get('pauseId');
 
@@ -68,6 +70,10 @@ const ReferrerPage = (_props: ReferrerPageProps) => {
         setRankingError(null);
         setScreenshotError(null);
         setDeepSearchAttempted(true);
+        setDeepSearchResultsReady(false);
+        
+        const startTime = Date.now();
+        setDeepSearchStartTime(startTime);
 
         const { product, amazonProducts } = decodedData;
 
@@ -127,7 +133,15 @@ const ReferrerPage = (_props: ReferrerPageProps) => {
             console.error("Deep Search failed:", error);
             setRankingError(error instanceof Error ? error.message : "An unknown error occurred.");
         } finally {
-            setIsRanking(false);
+            // Calculate remaining time to reach 5 seconds
+            const elapsedTime = Date.now() - startTime;
+            const remainingTime = Math.max(0, 5000 - elapsedTime);
+            
+            // Wait for the remaining time before showing results
+            setTimeout(() => {
+                setIsRanking(false);
+                setDeepSearchResultsReady(true);
+            }, remainingTime);
         }
     }, [decodedData, imageUrl, pauseId]);
 
@@ -242,9 +256,9 @@ const ReferrerPage = (_props: ReferrerPageProps) => {
                                 <Button
                                     variant={showDeepSearchView ? 'primary' : 'secondary'}
                                     onClick={handleDeepSearchClick}
-                                    disabled={rankedProducts.length === 0}
+                                    disabled={!deepSearchResultsReady || rankedProducts.length === 0}
                                 >
-                                    Deep Search
+                                    {isRanking ? 'Deep Search (Processing...)' : 'Deep Search'}
                                 </Button>
                             </div>
                             <div className="sticky top-4">

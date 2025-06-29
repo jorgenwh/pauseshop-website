@@ -112,7 +112,7 @@ const ReferrerPage = ({ onReset: _onReset }: ReferrerPageProps) => {
             try {
                 await callRankApi(initialRequest);
             } catch (error) {
-                if (error instanceof Error && error.message === 'SESSION_IMAGE_UNAVAILABLE') {
+                if (error instanceof Error && error.message.startsWith('SESSION_IMAGE_UNAVAILABLE')) {
                     // --- Attempt 2: Fallback with original image ---
                     if (imageUrl) {
                         const originalImage = await urlToBase64(imageUrl);
@@ -183,6 +183,7 @@ const ReferrerPage = ({ onReset: _onReset }: ReferrerPageProps) => {
                                 rankings={rankingResults}
                                 products={decodedData.amazonProducts}
                                 isRanking={isRanking}
+                                onProductSelect={handleProductSelect}
                             />
                         </div>
                     )}

@@ -29,6 +29,7 @@ const ReferrerPage = ({ onReset: _onReset }: ReferrerPageProps) => {
     const [isRanking, setIsRanking] = useState(false);
     const [rankingResults, setRankingResults] = useState<RankingResult[]>([]);
     const [rankingError, setRankingError] = useState<string | null>(null);
+    const [showDeepSearchView, setShowDeepSearchView] = useState(false);
 
     const pauseId = searchParams.get('pauseId');
 
@@ -141,8 +142,43 @@ const ReferrerPage = ({ onReset: _onReset }: ReferrerPageProps) => {
         }
     }, [decodedData, handleDeepSearch, isRanking, rankingResults.length]);
 
-    const handleProductSelect = (_product: AmazonProduct, index: number) => {
+    // Create ranked products array from ranking results
+    const rankedProducts = rankingResults
+        .map(ranking => {
+            const product = decodedData?.amazonProducts.find(p => p.id === ranking.id);
+            return product ? { ...product, ...ranking } : null;
+        })
+        .filter((p): p is (AmazonProduct & RankingResult) => p !== null)
+        .sort((a, b) => a.rank - b.rank);
+
+    const handleProductSelect = (product: AmazonProduct, index: number) => {
+        // If we're in deep search view and the product is clicked from RankingResults,
+        // we need to find its index in the ranked products array
+        if (showDeepSearchView && rankedProducts.some(p => p.id === product.id)) {
+            const rankedIndex = rankedProducts.findIndex(p => p.id === product.id);
+            if (rankedIndex !== -1) {
+                setSelectedProductIndex(rankedIndex);
+                return;
+            }
+        }
+        
+        // For original view or direct carousel clicks, use the provided index
         setSelectedProductIndex(index);
+    };
+
+    // Determine which products to show in carousel
+    const carouselProducts = showDeepSearchView ? rankedProducts : (decodedData?.amazonProducts || []);
+
+    const handleOriginalItemsClick = () => {
+        setShowDeepSearchView(false);
+        setSelectedProductIndex(0);
+    };
+
+    const handleDeepSearchClick = () => {
+        if (rankedProducts.length > 0) {
+            setShowDeepSearchView(true);
+            setSelectedProductIndex(0);
+        }
     };
 
     return (
@@ -172,7 +208,7 @@ const ReferrerPage = ({ onReset: _onReset }: ReferrerPageProps) => {
                         <div className="space-y-6">
                             <ProductDisplay
                                 product={decodedData.product}
-                                amazonProduct={decodedData.amazonProducts[selectedProductIndex]}
+                                amazonProduct={carouselProducts[selectedProductIndex]}
                             />
                              {rankingError && (
                                 <div className="text-red-500 text-center">{rankingError}</div>
@@ -193,19 +229,23 @@ const ReferrerPage = ({ onReset: _onReset }: ReferrerPageProps) => {
                         <>
                             <div className="absolute w-full flex justify-center space-x-4 -top-16 z-10">
                                 <Button
-                                    variant='primary'
+                                    variant={!showDeepSearchView ? 'primary' : 'secondary'}
+                                    onClick={handleOriginalItemsClick}
                                 >
                                     Original Items
                                 </Button>
                                 <Button
-                                    variant='secondary'
+                                    variant={showDeepSearchView ? 'primary' : 'secondary'}
+                                    onClick={handleDeepSearchClick}
+                                    disabled={rankedProducts.length === 0}
                                 >
                                     Deep Search
                                 </Button>
                             </div>
                             <div className="sticky top-4">
                                 <ProductCarousel
-                                    products={decodedData.amazonProducts}
+                                    key={showDeepSearchView ? 'deep-search' : 'original'}
+                                    products={carouselProducts}
                                     currentIndex={selectedProductIndex}
                                     onProductSelect={handleProductSelect}
                                 />

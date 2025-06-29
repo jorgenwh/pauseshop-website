@@ -57,20 +57,6 @@ const ReferrerPage = ({ onReset: _onReset }: ReferrerPageProps) => {
         return () => clearTimeout(timer);
     }, []);
 
-    useEffect(() => {
-        if (!imageUrl) {
-            const interval = setInterval(() => {
-                setLoadingDots(prev => (prev === '...' ? '.' : prev + '.'));
-            }, 500);
-            return () => clearInterval(interval);
-        }
-    }, [imageUrl]);
-
-    const handleProductSelect = (_product: AmazonProduct, index: number) => {
-        setSelectedProductIndex(index);
-    };
-
-
     const handleDeepSearch = useCallback(async () => {
         if (!decodedData || !decodedData.product) return;
 
@@ -139,6 +125,26 @@ const ReferrerPage = ({ onReset: _onReset }: ReferrerPageProps) => {
         }
     }, [decodedData, imageUrl, pauseId]);
 
+    useEffect(() => {
+        if (!imageUrl) {
+            const interval = setInterval(() => {
+                setLoadingDots(prev => (prev === '...' ? '.' : prev + '.'));
+            }, 500);
+            return () => clearInterval(interval);
+        }
+    }, [imageUrl]);
+
+    // Automatically trigger deep search when decoded data is available
+    useEffect(() => {
+        if (decodedData?.product && !isRanking && rankingResults.length === 0) {
+            handleDeepSearch();
+        }
+    }, [decodedData, handleDeepSearch, isRanking, rankingResults.length]);
+
+    const handleProductSelect = (_product: AmazonProduct, index: number) => {
+        setSelectedProductIndex(index);
+    };
+
     return (
         <div className={`container mx-auto px-4 py-8 max-w-7xl transition-opacity duration-500 ${animateIn ? 'opacity-100' : 'opacity-0'}`}>
             <AppHeader subtitle={TEXT.resultsDescription} className="mb-8" />
@@ -156,15 +162,6 @@ const ReferrerPage = ({ onReset: _onReset }: ReferrerPageProps) => {
                                     <div className="text-xl text-white font-semibold">Loading{loadingDots}</div>
                                 </div>
                             </div>
-                        )}
-                         {decodedData?.product && (
-                            <Button
-                                onClick={handleDeepSearch}
-                                disabled={isRanking}
-                                className="w-full mt-4"
-                            >
-                                {isRanking ? 'Searching...' : 'Deep Search'}
-                            </Button>
                         )}
                     </Card>
                 </div>

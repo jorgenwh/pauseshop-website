@@ -70,6 +70,7 @@ const ReferrerPage = ({ onReset: _onReset }: ReferrerPageProps) => {
         setSelectedProductIndex(index);
     };
 
+
     const handleDeepSearch = useCallback(async () => {
         if (!decodedData || !decodedData.product) return;
 
@@ -190,15 +191,29 @@ const ReferrerPage = ({ onReset: _onReset }: ReferrerPageProps) => {
                 </div>
 
                 {/* Product Carousel Section */}
-                <div className="lg:col-span-1">
+                <div className="lg:col-span-1 relative">
                     {decodedData && (
-                        <div className="sticky top-4">
-                            <ProductCarousel
-                                products={decodedData.amazonProducts}
-                                currentIndex={selectedProductIndex}
-                                onProductSelect={handleProductSelect}
-                            />
-                        </div>
+                        <>
+                            <div className="absolute w-full flex justify-center space-x-4 -top-16 z-10">
+                                <Button
+                                    variant='primary'
+                                >
+                                    Original Items
+                                </Button>
+                                <Button
+                                    variant='secondary'
+                                >
+                                    Deep Search
+                                </Button>
+                            </div>
+                            <div className="sticky top-4">
+                                <ProductCarousel
+                                    products={decodedData.amazonProducts}
+                                    currentIndex={selectedProductIndex}
+                                    onProductSelect={handleProductSelect}
+                                />
+                            </div>
+                        </>
                     )}
                 </div>
             </div>

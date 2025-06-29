@@ -35,11 +35,6 @@ const ResultsPage = ({ imageUrl, products, onReset }: ResultsPageProps) => {
         }
     }, [imageUrl, navigate]);
 
-    const handleNewSearch = () => {
-        onReset();
-        navigate('/');
-    };
-
     // Filter products based on selected categories
     const filteredProducts = useMemo(() => {
         if (selectedCategories.size === 0) {
@@ -48,6 +43,10 @@ const ResultsPage = ({ imageUrl, products, onReset }: ResultsPageProps) => {
         return products.filter(product => selectedCategories.has(product.category));
     }, [products, selectedCategories]);
 
+    const handleNewSearch = () => {
+        onReset();
+        navigate('/');
+    };
     if (!imageUrl) {
         return null;
     }

@@ -60,10 +60,9 @@ export interface AmazonProduct {
 
 /**
  * Represents the fully decoded data from the referrer URL.
- * This supports both the new fixed-length format and the legacy format.
  */
-export interface DecodedReferrerData {
-    product?: Product; // Available in new format
+export interface DecodedUrlData {
+    product?: Product;
     clickedAmazonProduct: AmazonProduct;
     clickedPosition: number;
     amazonProducts: AmazonProduct[];

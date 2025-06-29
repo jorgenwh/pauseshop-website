@@ -1,14 +1,12 @@
 /**
  * Decodes referrer data from a custom URL format.
- * Supports both a new fixed-length encoding and a legacy Base64 format.
  */
 import {
-    DecodedReferrerData,
+    DecodedUrlData,
     AmazonProduct,
     Product,
     Category,
     TargetGender,
-    LegacyReferrerData,
 } from "./types";
 
 // --- Constants based on URL_RECONSTRUCTION_GUIDE.md ---
@@ -35,20 +33,6 @@ function reconstructThumbnailUrl(imageId: string): string {
 
 function reconstructProductUrl(asin?: string): string | null {
     return asin ? `https://www.amazon.com/dp/${asin}` : null;
-}
-
-// --- Format Detection ---
-
-function isFixedLengthFormat(encodedData: string): boolean {
-    return encodedData.includes("||");
-}
-
-function isLegacyFormat(encodedData: string): boolean {
-    return (
-        !!encodedData.match(/^[A-Za-z0-9+/\-_=]+$/) &&
-        encodedData.length > 50 &&
-        !encodedData.includes("|")
-    );
 }
 
 // --- Parsers for New Fixed-Length Format ---
@@ -90,8 +74,8 @@ function parseAmazonProduct(productStr: string): Omit<AmazonProduct, 'id' | 'thu
     return { imageId, amazonAsin: asin, price };
 }
 
-function decodeFixedLengthData(encodedData: string): DecodedReferrerData | null {
-    const [productStr, amazonDataStr] = encodedData.split("||");
+export const decodeUrlData = (encodedUrlData: string): DecodedUrlData | null => {
+    const [productStr, amazonDataStr] = encodedUrlData.split("||");
     if (!productStr || !amazonDataStr) return null;
 
     const product = parseProductContext(productStr);

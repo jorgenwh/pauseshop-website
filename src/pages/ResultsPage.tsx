@@ -40,10 +40,6 @@ const ResultsPage = ({ imageUrl, products, onReset }: ResultsPageProps) => {
         navigate('/');
     };
 
-    if (!imageUrl) {
-        return null;
-    }
-
     // Filter products based on selected categories
     const filteredProducts = useMemo(() => {
         if (selectedCategories.size === 0) {
@@ -51,6 +47,10 @@ const ResultsPage = ({ imageUrl, products, onReset }: ResultsPageProps) => {
         }
         return products.filter(product => selectedCategories.has(product.category));
     }, [products, selectedCategories]);
+
+    if (!imageUrl) {
+        return null;
+    }
 
     // Toggle category selection
     const toggleCategory = (category: Category) => {
@@ -85,7 +85,7 @@ const ResultsPage = ({ imageUrl, products, onReset }: ResultsPageProps) => {
                 <div className="md:col-span-1">
                     <Card className="sticky top-4">
                         <h2 className="text-xl font-semibold mb-4 text-white">{TEXT.uploadedImage}</h2>
-                        <ImagePreview imageUrl={imageUrl} onRemove={() => handleNewSearch()} />
+                        <ImagePreview imageUrl={imageUrl} />
                         <Button
                             onClick={handleNewSearch}
                             variant="secondary"

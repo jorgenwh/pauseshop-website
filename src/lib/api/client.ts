@@ -130,7 +130,7 @@ export const analyzeImageStreaming = async (
                                         callbacks.onError(errorEvent);
                                         return;
                                     }
-                                } catch (parseError) {
+                                } catch {
                                     // Silent fail for parse errors
                                 }
                             }
@@ -215,7 +215,7 @@ export const rankProductsStreaming = async (
                         callbacks.onError(new Error('SESSION_IMAGE_UNAVAILABLE'));
                         return;
                     }
-                } catch (e) {
+                } catch {
                     // Not a JSON error, fall through to generic error
                 }
             }
@@ -269,7 +269,7 @@ export const rankProductsStreaming = async (
                                 callbacks.onError(new Error(`${parsedData.code}: ${parsedData.message}`));
                                 return;
                             }
-                        } catch (parseError) {
+                        } catch {
                             // Ignore non-JSON lines
                         }
                     }

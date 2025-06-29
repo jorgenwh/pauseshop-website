@@ -13,7 +13,7 @@ interface ProductCarouselProps {
 
 export const ProductCarousel = ({ products, currentIndex, onProductSelect }: ProductCarouselProps) => {
     const scrollContainerRef = useRef<HTMLDivElement>(null);
-    const updateAnimationRef = useRef<number | undefined>();
+    const updateAnimationRef = useRef<number | null>(null);
     const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
     const [itemStyles, setItemStyles] = useState<{ [key: number]: React.CSSProperties }>({});
     
@@ -173,7 +173,9 @@ export const ProductCarousel = ({ products, currentIndex, onProductSelect }: Pro
                     {products.map((product, index) => (
                         <div
                             key={product.imageId}
-                            ref={el => (itemRefs.current[index] = el)}
+                            ref={el => {
+                                itemRefs.current[index] = el;
+                            }}
                             data-index={index}
                             className={`
                                 relative cursor-pointer

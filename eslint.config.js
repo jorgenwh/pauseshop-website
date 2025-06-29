@@ -5,12 +5,11 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-    { ignores: ["dist", "dev-dist"] },
+    { ignores: ["dist", "dev-dist", "auto-imports.d.ts"] },
     {
         extends: [
             js.configs.recommended,
             ...tseslint.configs.recommended,
-            "./.eslintrc-auto-import.json",
         ],
         files: ["**/src/**/*.{ts,tsx}"],
         languageOptions: {

@@ -3,7 +3,7 @@
  * Handles HTTP requests to the backend server
  */
 
-import { Product } from "../types";
+import { Product, RankingRequest, RankingCallbacks } from "../types";
 import { getEndpointUrl } from "./endpoints";
 
 
@@ -181,5 +181,112 @@ export const getScreenshot = async (sessionId: string): Promise<string | null> =
     } catch (error) {
         console.error('Error fetching screenshot:', error);
         return null;
+    }
+};
+
+/**
+ * Sends a request to the server to rank products based on visual similarity.
+ * Handles the streaming response for real-time updates.
+ */
+export const rankProductsStreaming = async (
+    request: RankingRequest,
+    callbacks: RankingCallbacks,
+    signal?: AbortSignal
+): Promise<void> => {
+    const url = getEndpointUrl('/analyze/rank-products');
+
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "text/event-stream",
+                "Cache-Control": "no-cache",
+            },
+            body: JSON.stringify(request),
+            signal: signal,
+        });
+
+        if (!response.ok) {
+            if (response.status === 404) {
+                try {
+                    const errorData = await response.json();
+                    if (errorData.code === 'SESSION_IMAGE_UNAVAILABLE') {
+                        callbacks.onError(new Error('SESSION_IMAGE_UNAVAILABLE'));
+                        return;
+                    }
+                } catch {
+                    // Not a JSON error, fall through to generic error
+                }
+            }
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        if (!response.body) {
+            throw new Error("Response body is null");
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+
+        const processStream = async () => {
+            try {
+                let done = false;
+                do {
+                    if (signal?.aborted) {
+                        reader.cancel();
+                        throw new DOMException('Operation aborted', 'AbortError');
+                    }
+
+                    const { done: currentDone, value } = await reader.read();
+                    done = currentDone;
+
+                    if (done) {
+                        return;
+                    }
+
+                    const chunk = decoder.decode(value, { stream: true });
+                    buffer += chunk;
+                    const lines = buffer.split("\n");
+                    buffer = lines.pop() || "";
+
+                    for (const line of lines) {
+                        if (!line.startsWith("data: ")) continue;
+
+                        const data = line.substring(6).trim();
+                        if (!data) continue;
+
+                        try {
+                            const parsedData = JSON.parse(data);
+
+                            if (parsedData.rank) {
+                                callbacks.onRanking(parsedData);
+                            } else if (parsedData.totalRankings !== undefined) {
+                                callbacks.onComplete(parsedData);
+                                return;
+                            } else if (parsedData.message) {
+                                callbacks.onError(new Error(`${parsedData.code}: ${parsedData.message}`));
+                                return;
+                            }
+                        } catch {
+                            // Ignore non-JSON lines
+                        }
+                    }
+                } while (!done);
+            } catch (error) {
+                if (error instanceof Error && error.name === 'AbortError') {
+                    throw error;
+                }
+                callbacks.onError(new Error("Stream processing failed"));
+            }
+        };
+
+        await processStream();
+    } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') {
+            throw error;
+        }
+        callbacks.onError(new Error("Connection failed"));
     }
 };

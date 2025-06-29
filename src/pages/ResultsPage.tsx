@@ -47,7 +47,6 @@ const ResultsPage = ({ imageUrl, products, onReset }: ResultsPageProps) => {
         onReset();
         navigate('/');
     };
-
     if (!imageUrl) {
         return null;
     }
@@ -85,7 +84,7 @@ const ResultsPage = ({ imageUrl, products, onReset }: ResultsPageProps) => {
                 <div className="md:col-span-1">
                     <Card className="sticky top-4">
                         <h2 className="text-xl font-semibold mb-4 text-white">{TEXT.uploadedImage}</h2>
-                        <ImagePreview imageUrl={imageUrl} onRemove={() => handleNewSearch()} />
+                        <ImagePreview imageUrl={imageUrl} />
                         <Button
                             onClick={handleNewSearch}
                             variant="secondary"

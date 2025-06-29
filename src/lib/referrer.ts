@@ -1,5 +1,5 @@
 /**
- * Decodes referrer data from a custom URL format.
+ * Simplified referrer data decoder - only keeping what's actually used
  */
 import {
     DecodedUrlData,
@@ -9,7 +9,7 @@ import {
     TargetGender,
 } from "./types";
 
-// --- Constants based on URL_RECONSTRUCTION_GUIDE.md ---
+// --- Constants ---
 
 const IMAGE_ID_LENGTH = 11;
 const ASIN_LENGTH = 10;
@@ -35,7 +35,7 @@ function reconstructProductUrl(asin?: string): string | null {
     return asin ? `https://www.amazon.com/dp/${asin}` : null;
 }
 
-// --- Parsers for New Fixed-Length Format ---
+// --- Parsers ---
 
 function parseProductContext(productStr: string): Product {
     const parts = productStr.split("~");
@@ -53,7 +53,7 @@ function parseProductContext(productStr: string): Product {
     };
 }
 
-function parseAmazonProduct(productStr: string): Omit<AmazonProduct, 'thumbnailUrl' | 'productUrl'> {
+function parseAmazonProduct(productStr: string): Omit<AmazonProduct, 'id' | 'thumbnailUrl' | 'productUrl'> {
     const imageId = productStr.substring(0, IMAGE_ID_LENGTH);
     let asin: string | undefined;
     let price: number | undefined;
@@ -84,10 +84,11 @@ export const decodeUrlData = (encodedUrlData: string): DecodedUrlData | null => 
     const contextProductParts = amazonParts.slice(1);
 
     const amazonProducts: AmazonProduct[] = contextProductParts
-        .map(part => {
+        .map((part, index) => {
             if (!part || part.length < IMAGE_ID_LENGTH) return null;
             const parsed = parseAmazonProduct(part);
             return {
+                id: String(index + 1), // Assign sequential ID
                 ...parsed,
                 thumbnailUrl: reconstructThumbnailUrl(parsed.imageId),
                 productUrl: reconstructProductUrl(parsed.amazonAsin),
@@ -105,4 +106,10 @@ export const decodeUrlData = (encodedUrlData: string): DecodedUrlData | null => 
         clickedPosition,
         amazonProducts,
     };
+}
+
+// --- Main Exported Function ---
+
+export function decodeReferrerData(encodedData: string): DecodedUrlData | null {
+    return decodeUrlData(encodedData);
 }

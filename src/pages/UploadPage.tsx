@@ -62,7 +62,7 @@ const UploadPage = ({
                     </>
                 ) : (
                     <div className="space-y-4">
-                        <ImagePreview imageUrl={previewUrl} onRemove={reset} />
+                        <ImagePreview imageUrl={previewUrl} />
 
                         <ActionButtons
                             onCancel={reset}

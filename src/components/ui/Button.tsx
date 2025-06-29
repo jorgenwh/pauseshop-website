@@ -29,7 +29,7 @@ const Button = ({
     type = 'button',
     fullWidth = false
 }: ButtonProps) => {
-    const baseClasses = 'font-medium rounded-md transition-colors flex items-center justify-center';
+    const baseClasses = 'font-medium rounded-md transition-colors flex items-center justify-center whitespace-nowrap';
     
     const variantClasses = {
         primary: disabled || loading 

@@ -1,3 +1,3 @@
 /// <reference types="vite/client" />
 
-declare const __SERVER_ENV__: string;
+// Server environment type is declared in src/lib/api/endpoints.ts

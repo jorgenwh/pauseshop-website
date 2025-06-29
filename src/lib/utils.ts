@@ -273,3 +273,33 @@ export const constructAmazonSearchUrl = (product: Product): string => {
     return `https://www.amazon.com/s?k=${encodedName}`;
 };
 
+
+/**
+ * Fetches an image from a URL and converts it to a base64 string.
+ * @param url The URL of the image to fetch.
+ * @returns A promise that resolves with the base64-encoded image data.
+ */
+export const imageUrlToBase64 = (url: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    resolve(reader.result as string);
+                };
+                reader.onerror = () => {
+                    reject(new Error("Failed to convert blob to base64"));
+                };
+                reader.readAsDataURL(blob);
+            })
+            .catch(error => {
+                reject(new Error(`Failed to fetch image: ${error.message}`));
+            });
+    });
+};

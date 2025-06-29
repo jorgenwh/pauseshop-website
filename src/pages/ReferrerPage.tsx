@@ -3,15 +3,17 @@
  * Displays the pause screenshot and product results without filtering
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ImagePreview } from '../features/image-upload';
-import { ProductDisplay, ProductCarousel } from '../features/product-display';
-import { AppHeader, Card } from '../components/ui';
+import { ProductDisplay } from '../features/product-display';
+import { ProductCarousel, RankingResults } from '../features/referrer';
+import { AppHeader, Card, Button } from '../components/ui';
 import { TEXT } from '../lib/constants';
-import { getScreenshot } from '../lib/api';
+import { getScreenshot, rankProductsStreaming } from '../lib/api';
+import { imageUrlToBase64 as urlToBase64 } from '../lib/utils';
 import { decodeReferrerData } from '../lib/referrer';
-import { DecodedReferrerData, AmazonProduct } from '../lib/types';
+import { DecodedReferrerData, AmazonProduct, RankingResult, RankingRequest } from '../lib/types';
 
 interface ReferrerPageProps {
     onReset: () => void;
@@ -24,9 +26,13 @@ const ReferrerPage = ({ onReset: _onReset }: ReferrerPageProps) => {
     const [loadingDots, setLoadingDots] = useState('.');
     const [decodedData, setDecodedData] = useState<DecodedReferrerData | null>(null);
     const [selectedProductIndex, setSelectedProductIndex] = useState(0);
+    const [isRanking, setIsRanking] = useState(false);
+    const [rankingResults, setRankingResults] = useState<RankingResult[]>([]);
+    const [rankingError, setRankingError] = useState<string | null>(null);
+
+    const pauseId = searchParams.get('pauseId');
 
     useEffect(() => {
-        const pauseId = searchParams.get('pauseId');
         const data = searchParams.get('data');
 
         if (pauseId) {
@@ -44,7 +50,7 @@ const ReferrerPage = ({ onReset: _onReset }: ReferrerPageProps) => {
                 setSelectedProductIndex(decoded.clickedPosition);
             }
         }
-    }, [searchParams]);
+    }, [searchParams, pauseId]);
 
     useEffect(() => {
         const timer = setTimeout(() => setAnimateIn(true), 100);
@@ -64,6 +70,72 @@ const ReferrerPage = ({ onReset: _onReset }: ReferrerPageProps) => {
         setSelectedProductIndex(index);
     };
 
+    const handleDeepSearch = useCallback(async () => {
+        if (!decodedData || !decodedData.product) return;
+
+        setIsRanking(true);
+        setRankingResults([]);
+        setRankingError(null);
+
+        const { product, amazonProducts } = decodedData;
+
+        const callRankApi = async (request: RankingRequest) => {
+            return new Promise<void>((resolve, reject) => {
+                rankProductsStreaming(
+                    request,
+                    {
+                        onRanking: (result) => {
+                            setRankingResults(prev => [...prev, result].sort((a, b) => a.rank - b.rank));
+                        },
+                        onComplete: () => resolve(),
+                        onError: (error) => reject(error),
+                    }
+                );
+            });
+        };
+
+        try {
+            const thumbnailPromises = amazonProducts.map(async (p) => ({
+                id: p.imageId,
+                image: await urlToBase64(p.thumbnailUrl),
+            }));
+            const thumbnails = await Promise.all(thumbnailPromises);
+
+            // --- Attempt 1: Session-first ---
+            const initialRequest: RankingRequest = {
+                productName: product.name,
+                pauseId: pauseId ?? undefined,
+                thumbnails,
+            };
+
+            try {
+                await callRankApi(initialRequest);
+            } catch (error) {
+                if (error instanceof Error && error.message === 'SESSION_IMAGE_UNAVAILABLE') {
+                    // --- Attempt 2: Fallback with original image ---
+                    if (imageUrl) {
+                        const originalImage = await urlToBase64(imageUrl);
+                        const fallbackRequest: RankingRequest = {
+                            productName: product.name,
+                            originalImage,
+                            thumbnails,
+                        };
+                        await callRankApi(fallbackRequest);
+                    } else {
+                        throw new Error("Original image not available for fallback.");
+                    }
+                } else {
+                    throw error; // Re-throw other errors
+                }
+            }
+        } catch (error) {
+            console.error("Deep Search failed:", error);
+            setRankingError(error instanceof Error ? error.message : "An unknown error occurred.");
+        } finally {
+            setIsRanking(false);
+        }
+    }, [decodedData, imageUrl, pauseId]);
+
     return (
         <div className={`container mx-auto px-4 py-8 max-w-7xl transition-opacity duration-500 ${animateIn ? 'opacity-100' : 'opacity-0'}`}>
             <AppHeader subtitle={TEXT.resultsDescription} className="mb-8" />
@@ -82,6 +154,15 @@ const ReferrerPage = ({ onReset: _onReset }: ReferrerPageProps) => {
                                 </div>
                             </div>
                         )}
+                         {decodedData?.product && (
+                            <Button
+                                onClick={handleDeepSearch}
+                                disabled={isRanking}
+                                className="w-full mt-4"
+                            >
+                                {isRanking ? 'Searching...' : 'Deep Search'}
+                            </Button>
+                        )}
                     </Card>
                 </div>
 
@@ -92,6 +173,14 @@ const ReferrerPage = ({ onReset: _onReset }: ReferrerPageProps) => {
                             <ProductDisplay
                                 product={decodedData.product}
                                 amazonProduct={decodedData.amazonProducts[selectedProductIndex]}
+                            />
+                             {rankingError && (
+                                <div className="text-red-500 text-center">{rankingError}</div>
+                            )}
+                            <RankingResults
+                                rankings={rankingResults}
+                                products={decodedData.amazonProducts}
+                                isRanking={isRanking}
                             />
                         </div>
                     )}

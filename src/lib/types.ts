@@ -50,6 +50,7 @@ export interface Product {
  * Represents a single Amazon product parsed from the encoded data.
  */
 export interface AmazonProduct {
+    id: string;
     imageId: string;
     amazonAsin?: string;
     price?: number;
@@ -78,4 +79,36 @@ export interface LegacyReferrerData {
         a?: string; // asin
         pr?: number; // price
     }[];
+}
+
+// --- Types for AI Product Ranking ---
+
+export interface ThumbnailData {
+    id: string;      // Unique identifier (e.g., "1", "2")
+    image: string;   // base64 thumbnail image
+}
+
+export interface RankingRequest {
+    productName: string;
+    thumbnails: ThumbnailData[];
+    originalImage?: string; // Fallback if session image fails
+    pauseId?: string;       // Primary identifier for session image
+}
+
+export interface RankingResult {
+    id: string;      // Matches thumbnail ID
+    similarityScore: number;   // 0-1 similarity score
+    rank: number;    // 1-N position
+}
+
+export interface RankingCompleteResponse {
+    totalRankings: number;
+    processingTime: number;
+    // Not including usage details on frontend for now
+}
+
+export interface RankingCallbacks {
+    onRanking: (ranking: RankingResult) => void;
+    onComplete: (response: RankingCompleteResponse) => void;
+    onError: (error: Error) => void;
 }

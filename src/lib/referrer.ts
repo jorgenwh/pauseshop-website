@@ -69,7 +69,7 @@ function parseProductContext(productStr: string): Product {
     };
 }
 
-function parseAmazonProduct(productStr: string): Omit<AmazonProduct, 'thumbnailUrl' | 'productUrl'> {
+function parseAmazonProduct(productStr: string): Omit<AmazonProduct, 'id' | 'thumbnailUrl' | 'productUrl'> {
     const imageId = productStr.substring(0, IMAGE_ID_LENGTH);
     let asin: string | undefined;
     let price: number | undefined;
@@ -100,10 +100,11 @@ function decodeFixedLengthData(encodedData: string): DecodedReferrerData | null 
     const contextProductParts = amazonParts.slice(1);
 
     const amazonProducts: AmazonProduct[] = contextProductParts
-        .map(part => {
+        .map((part, index) => {
             if (!part || part.length < IMAGE_ID_LENGTH) return null;
             const parsed = parseAmazonProduct(part);
             return {
+                id: String(index + 1), // Assign sequential ID
                 ...parsed,
                 thumbnailUrl: reconstructThumbnailUrl(parsed.imageId),
                 productUrl: reconstructProductUrl(parsed.amazonAsin),
@@ -135,7 +136,8 @@ function decodeLegacyData(encodedData: string): DecodedReferrerData | null {
         const legacyData = JSON.parse(jsonString) as LegacyReferrerData;
 
         const clickedPosition = legacyData.c || 0;
-        const amazonProducts: AmazonProduct[] = legacyData.p.map(item => ({
+        const amazonProducts: AmazonProduct[] = legacyData.p.map((item, index) => ({
+            id: String(index + 1), // Assign sequential ID
             imageId: item.i,
             amazonAsin: item.a,
             price: item.pr,

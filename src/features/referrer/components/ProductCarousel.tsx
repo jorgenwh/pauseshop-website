@@ -11,9 +11,9 @@ interface ProductCarouselProps {
     onProductSelect: (product: AmazonProduct, index: number) => void;
 }
 
-const ProductCarousel = ({ products, currentIndex, onProductSelect }: ProductCarouselProps) => {
+export const ProductCarousel = ({ products, currentIndex, onProductSelect }: ProductCarouselProps) => {
     const scrollContainerRef = useRef<HTMLDivElement>(null);
-    const updateAnimationRef = useRef<number>();
+    const updateAnimationRef = useRef<number | undefined>();
     const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
     const [itemStyles, setItemStyles] = useState<{ [key: number]: React.CSSProperties }>({});
     
@@ -173,7 +173,7 @@ const ProductCarousel = ({ products, currentIndex, onProductSelect }: ProductCar
                     {products.map((product, index) => (
                         <div
                             key={product.imageId}
-                            ref={el => itemRefs.current[index] = el}
+                            ref={el => (itemRefs.current[index] = el)}
                             data-index={index}
                             className={`
                                 relative cursor-pointer
@@ -204,5 +204,3 @@ const ProductCarousel = ({ products, currentIndex, onProductSelect }: ProductCar
         </div>
     );
 };
-
-export default ProductCarousel;

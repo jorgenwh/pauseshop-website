@@ -68,17 +68,6 @@ export interface DecodedUrlData {
     amazonProducts: AmazonProduct[];
 }
 
-/**
- * Legacy data structure for backward compatibility.
- */
-export interface LegacyReferrerData {
-    c: number; // clickedPosition
-    p: {
-        i: string; // imageId
-        a?: string; // asin
-        pr?: number; // price
-    }[];
-}
 
 // --- Types for AI Product Ranking ---
 

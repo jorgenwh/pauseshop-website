@@ -1,5 +1,5 @@
 /**
- * Decodes referrer data from a custom URL format.
+ * Simplified referrer data decoder - only keeping what's actually used
  */
 import {
     DecodedUrlData,
@@ -9,7 +9,7 @@ import {
     TargetGender,
 } from "./types";
 
-// --- Constants based on URL_RECONSTRUCTION_GUIDE.md ---
+// --- Constants ---
 
 const IMAGE_ID_LENGTH = 11;
 const ASIN_LENGTH = 10;
@@ -35,7 +35,7 @@ function reconstructProductUrl(asin?: string): string | null {
     return asin ? `https://www.amazon.com/dp/${asin}` : null;
 }
 
-// --- Parsers for New Fixed-Length Format ---
+// --- Parsers ---
 
 function parseProductContext(productStr: string): Product {
     const parts = productStr.split("~");
@@ -108,50 +108,8 @@ export const decodeUrlData = (encodedUrlData: string): DecodedUrlData | null => 
     };
 }
 
-// --- Parser for Legacy Base64 Format ---
-
-function decodeLegacyData(encodedData: string): DecodedReferrerData | null {
-    try {
-        let base64String = encodedData.replace(/-/g, '+').replace(/_/g, '/');
-        while (base64String.length % 4) {
-            base64String += '=';
-        }
-        const jsonString = atob(base64String);
-        const legacyData = JSON.parse(jsonString) as LegacyReferrerData;
-
-        const clickedPosition = legacyData.c || 0;
-        const amazonProducts: AmazonProduct[] = legacyData.p.map((item, index) => ({
-            id: String(index + 1), // Assign sequential ID
-            imageId: item.i,
-            amazonAsin: item.a,
-            price: item.pr,
-            thumbnailUrl: reconstructThumbnailUrl(item.i),
-            productUrl: reconstructProductUrl(item.a),
-        }));
-
-        if (amazonProducts.length === 0) return null;
-        const clickedAmazonProduct = amazonProducts[clickedPosition] || amazonProducts[0];
-
-        return {
-            clickedAmazonProduct,
-            clickedPosition,
-            amazonProducts,
-        };
-    } catch (error) {
-        console.error('[PauseShop:ReferrerDecoder] Failed to decode legacy referrer data:', error);
-        return null;
-    }
-}
-
 // --- Main Exported Function ---
 
-export function decodeReferrerData(encodedData: string): DecodedReferrerData | null {
-    if (isFixedLengthFormat(encodedData)) {
-        return decodeFixedLengthData(encodedData);
-    }
-    if (isLegacyFormat(encodedData)) {
-        return decodeLegacyData(encodedData);
-    }
-    console.error('[PauseShop:ReferrerDecoder] Unknown referrer data format.');
-    return null;
+export function decodeReferrerData(encodedData: string): DecodedUrlData | null {
+    return decodeUrlData(encodedData);
 }

@@ -13,19 +13,18 @@ import { TEXT } from '../lib/constants';
 import { getScreenshot, rankProductsStreaming } from '../lib/api';
 import { imageUrlToBase64 as urlToBase64 } from '../lib/utils';
 import { decodeReferrerData } from '../lib/referrer';
-import { DecodedReferrerData, AmazonProduct, RankingResult, RankingRequest } from '../lib/types';
+import { DecodedUrlData, AmazonProduct, RankingResult, RankingRequest } from '../lib/types';
 
 interface ReferrerPageProps {
     onReset: () => void;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const ReferrerPage = (_props: ReferrerPageProps) => {
     const [searchParams] = useSearchParams();
     const [imageUrl, setImageUrl] = useState<string | null>(null);
     const [animateIn, setAnimateIn] = useState(false);
     const [loadingDots, setLoadingDots] = useState('.');
-    const [decodedData, setDecodedData] = useState<DecodedReferrerData | null>(null);
+    const [decodedData, setDecodedData] = useState<DecodedUrlData | null>(null);
     const [selectedProductIndex, setSelectedProductIndex] = useState(0);
     const [isRanking, setIsRanking] = useState(false);
     const [rankingResults, setRankingResults] = useState<RankingResult[]>([]);
@@ -88,7 +87,7 @@ const ReferrerPage = (_props: ReferrerPageProps) => {
         };
 
         try {
-            const thumbnailPromises = amazonProducts.map(async (p) => ({
+            const thumbnailPromises = amazonProducts.map(async (p: AmazonProduct) => ({
                 id: p.imageId,
                 image: await urlToBase64(p.thumbnailUrl),
             }));
@@ -150,8 +149,8 @@ const ReferrerPage = (_props: ReferrerPageProps) => {
 
     // Create ranked products array from ranking results
     const rankedProducts = rankingResults
-        .map(ranking => {
-            const product = decodedData?.amazonProducts.find(p => p.id === ranking.id);
+        .map((ranking: RankingResult) => {
+            const product = decodedData?.amazonProducts.find((p: AmazonProduct) => p.id === ranking.id);
             return product ? { ...product, ...ranking } : null;
         })
         .filter((p): p is (AmazonProduct & RankingResult) => p !== null)

@@ -25,68 +25,70 @@ const ProductDisplay = ({ product, amazonProduct }: ProductDisplayProps) => {
             </div>
 
             {/* Product Details */}
-            <div className="flex-1 space-y-4">
-                <div>
-                    <h2 className="text-2xl font-bold text-white mb-2">
-                        {product?.name || 'Product Details'}
-                    </h2>
-                    {product?.brand && !['unknown', 'other'].includes(product.brand.toLowerCase()) && (
-                        <p className="text-gray-300 text-lg">{product.brand}</p>
+            <div className="flex-1 flex flex-col">
+                <div className="flex-1 space-y-4">
+                    <div>
+                        <h2 className="text-2xl font-bold text-white mb-2">
+                            {product?.name || 'Product Details'}
+                        </h2>
+                        {product?.brand && !['unknown', 'other'].includes(product.brand.toLowerCase()) && (
+                            <p className="text-gray-300 text-lg">{product.brand}</p>
+                        )}
+                    </div>
+
+                    {product && (
+                        <div className="space-y-3 text-sm">
+                            {product.category && !['unknown', 'other'].includes(product.category.toLowerCase()) && (
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-400">Category:</span>
+                                    <span className="text-white capitalize">{product.category.replace('_', ' ')}</span>
+                                </div>
+                            )}
+                            {product.targetGender && !['unknown', 'other'].includes(product.targetGender.toLowerCase()) && (
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-400">Target:</span>
+                                    <span className="text-white capitalize">{product.targetGender}</span>
+                                </div>
+                            )}
+                            <div className="flex justify-between items-center">
+                                <span className="text-gray-400">Confidence:</span>
+                                <span className="text-white">{(product.confidence * 100).toFixed(1)}%</span>
+                            </div>
+                            {product.secondaryColors.filter(color => !['unknown', 'other'].includes(color.toLowerCase())).length > 0 && (
+                                <div className="flex justify-between items-start">
+                                    <span className="text-gray-400">Secondary Colors:</span>
+                                    <div className="flex flex-wrap gap-1 justify-end max-w-xs">
+                                        {product.secondaryColors
+                                            .filter(color => !['unknown', 'other'].includes(color.toLowerCase()))
+                                            .map((color, index) => (
+                                                <span key={index} className="bg-gray-700 text-white px-2 py-1 rounded text-xs capitalize">
+                                                    {color}
+                                                </span>
+                                            ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {product?.features && product.features.filter(feature => !['unknown', 'other'].includes(feature.toLowerCase())).length > 0 && (
+                        <div>
+                            <span className="text-gray-400 text-sm">Features:</span>
+                            <div className="flex flex-wrap gap-2 mt-2">
+                                {product.features
+                                    .filter(feature => !['unknown', 'other'].includes(feature.toLowerCase()))
+                                    .map((feature, index) => (
+                                        <span key={index} className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs">
+                                            {feature}
+                                        </span>
+                                    ))}
+                            </div>
+                        </div>
                     )}
                 </div>
 
-                {product && (
-                    <div className="space-y-3 text-sm">
-                        {product.category && !['unknown', 'other'].includes(product.category.toLowerCase()) && (
-                            <div className="flex justify-between items-center">
-                                <span className="text-gray-400">Category:</span>
-                                <span className="text-white capitalize">{product.category.replace('_', ' ')}</span>
-                            </div>
-                        )}
-                        {product.targetGender && !['unknown', 'other'].includes(product.targetGender.toLowerCase()) && (
-                            <div className="flex justify-between items-center">
-                                <span className="text-gray-400">Target:</span>
-                                <span className="text-white capitalize">{product.targetGender}</span>
-                            </div>
-                        )}
-                        <div className="flex justify-between items-center">
-                            <span className="text-gray-400">Confidence:</span>
-                            <span className="text-white">{(product.confidence * 100).toFixed(1)}%</span>
-                        </div>
-                        {product.secondaryColors.filter(color => !['unknown', 'other'].includes(color.toLowerCase())).length > 0 && (
-                            <div className="flex justify-between items-start">
-                                <span className="text-gray-400">Secondary Colors:</span>
-                                <div className="flex flex-wrap gap-1 justify-end max-w-xs">
-                                    {product.secondaryColors
-                                        .filter(color => !['unknown', 'other'].includes(color.toLowerCase()))
-                                        .map((color, index) => (
-                                            <span key={index} className="bg-gray-700 text-white px-2 py-1 rounded text-xs capitalize">
-                                                {color}
-                                            </span>
-                                        ))}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {product?.features && product.features.filter(feature => !['unknown', 'other'].includes(feature.toLowerCase())).length > 0 && (
-                    <div>
-                        <span className="text-gray-400 text-sm">Features:</span>
-                        <div className="flex flex-wrap gap-2 mt-2">
-                            {product.features
-                                .filter(feature => !['unknown', 'other'].includes(feature.toLowerCase()))
-                                .map((feature, index) => (
-                                    <span key={index} className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs">
-                                        {feature}
-                                    </span>
-                                ))}
-                        </div>
-                    </div>
-                )}
-
                 {amazonProduct.productUrl && (
-                    <div className="pt-4">
+                    <div className="lg:mt-auto lg:pt-4">
                         <a
                             href={amazonProduct.productUrl}
                             target="_blank"

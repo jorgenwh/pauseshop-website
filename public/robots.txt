@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+# Allow specific pages to be indexed
+Allow: /results
+
+# Disallow private extension-only pages
+Disallow: /referrer
+
+# Sitemap location (you can add this later when you create a sitemap)
+# Sitemap: https://pauseshop.net/sitemap.xml
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1

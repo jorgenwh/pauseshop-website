@@ -15,6 +15,7 @@ import { ActionButtons, AppHeader, Card } from '../components/ui';
 
 // Import constants
 import { TEXT } from '../lib/constants';
+import { Seo } from '../components/Seo';
 
 interface UploadPageProps {
     isLoading: boolean;
@@ -37,6 +38,7 @@ const UploadPage = ({
 }: UploadPageProps) => {
     const navigate = useNavigate();
 
+
     // Navigate to results page when analysis is completed (regardless of whether products were found)
     useEffect(() => {
         if (analysisCompleted && !isLoading) {
@@ -50,6 +52,12 @@ const UploadPage = ({
 
     return (
         <div className="container mx-auto px-4 py-8 max-w-3xl">
+            <Seo
+                title="Upload Image"
+                description="Upload an image to find similar products. PauseShop uses AI to analyze your photos and discover matching items from top retailers."
+                canonical="/"
+                robots="index, follow"
+            />
             <AppHeader subtitle={TEXT.appDescription} className="mb-8" />
 
             <Card className="mb-6">

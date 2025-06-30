@@ -103,15 +103,17 @@ const ResultsPage = ({ imageUrl, products, onReset }: ResultsPageProps) => {
                             {TEXT.newSearchButton}
                         </Button>
                     </Card>
-                    <div className="mt-2">
-                        <AmazonAssociateDisclaimer />
-                    </div>
                 </div>
 
                 {/* Right column - Products */}
                 <div className="md:col-span-2">
                     {filteredProducts.length > 0 ? (
-                        <ProductList products={filteredProducts} />
+                        <>
+                            <ProductList products={filteredProducts} />
+                            <div className="mt-2">
+                                <AmazonAssociateDisclaimer />
+                            </div>
+                        </>
                     ) : (
                         <Card>
                             {products.length === 0 ? (

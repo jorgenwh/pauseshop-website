@@ -11,7 +11,7 @@ interface ProductCarouselProps {
     onProductSelect: (product: AmazonProduct, index: number) => void;
 }
 
-export const ProductCarousel = ({ products, currentIndex, onProductSelect }: ProductCarouselProps) => {
+const ProductCarousel = ({ products, currentIndex, onProductSelect }: ProductCarouselProps) => {
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const updateAnimationRef = useRef<number | null>(null);
     const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -206,3 +206,5 @@ export const ProductCarousel = ({ products, currentIndex, onProductSelect }: Pro
         </div>
     );
 };
+
+export default ProductCarousel;

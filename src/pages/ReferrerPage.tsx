@@ -6,8 +6,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ImagePreview } from '../features/image-upload';
-import { ProductDisplay } from '../features/product-display';
-import { ProductCarousel } from '../features/referrer';
+import { ProductDisplay, ProductCarousel } from '../features/product-display';
 import { AppHeader, Card, Button } from '../components/ui';
 import AmazonAssociateDisclaimer from '../components/ui/AmazonAssociateDisclaimer';
 import { TEXT, CAROUSEL_CONFIG } from '../lib/constants';

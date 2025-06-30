@@ -9,7 +9,7 @@ import { ImagePreview } from '../features/image-upload';
 import { ProductDisplay } from '../features/product-display';
 import { ProductCarousel } from '../features/referrer';
 import { AppHeader, Card, Button } from '../components/ui';
-import { TEXT } from '../lib/constants';
+import { TEXT, CAROUSEL_CONFIG } from '../lib/constants';
 import { getScreenshot, rankProductsStreaming } from '../lib/api';
 import { imageUrlToBase64 as urlToBase64 } from '../lib/utils';
 import { decodeReferrerData } from '../lib/referrer';
@@ -216,7 +216,7 @@ const ReferrerPage = (_props: ReferrerPageProps) => {
     };
 
     // Determine which products to show in carousel
-    const carouselProducts = showDeepSearchView ? rankedProducts : (decodedData?.amazonProducts || []);
+    const carouselProducts = showDeepSearchView ? rankedProducts : (decodedData?.amazonProducts.slice(0, CAROUSEL_CONFIG.itemLimit) || []);
 
     const handleOriginalItemsClick = () => {
         setShowDeepSearchView(false);

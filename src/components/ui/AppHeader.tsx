@@ -23,7 +23,7 @@ const AppHeader = ({ subtitle, className = "", showBrowserExtensionButton = true
     return (
         <div className={`relative text-center ${className}`}>
             {extensionUrl && showBrowserExtensionButton && (
-                <div className="absolute top-0 right-0">
+                <div className="absolute top-0 right-0 hidden md:block">
                     <Button
                         variant="extension"
                         size="sm"

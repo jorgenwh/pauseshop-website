@@ -232,7 +232,7 @@ const ReferrerPage = (_props: ReferrerPageProps) => {
 
     return (
         <div className={`container mx-auto px-4 py-8 max-w-7xl transition-opacity duration-500 ${animateIn ? 'opacity-100' : 'opacity-0'}`}>
-            <AppHeader subtitle={TEXT.resultsDescription} className="mb-8" />
+            <AppHeader subtitle={TEXT.resultsDescription} className="mb-8" showBrowserExtensionButton={false} />
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 {/* Screenshot Section */}

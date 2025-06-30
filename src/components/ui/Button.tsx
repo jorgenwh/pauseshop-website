@@ -3,7 +3,7 @@
  */
 import { ReactNode } from 'react';
 
-type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost';
+type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost' | 'glow' | 'clean';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface ButtonProps {
@@ -43,7 +43,13 @@ const Button = ({
             : 'bg-red-500 hover:bg-red-600 text-white',
         ghost: disabled || loading 
             ? 'text-gray-500 cursor-not-allowed' 
-            : 'text-[#30B3A4] hover:text-[#30B3A4]/80 hover:bg-[#30B3A4]/10'
+            : 'text-[#30B3A4] hover:text-[#30B3A4]/80 hover:bg-[#30B3A4]/10',
+        glow: disabled || loading 
+            ? 'bg-gray-700/70 text-gray-400 cursor-not-allowed' 
+            : 'bg-white text-gray-900 hover:bg-gray-100 btn-glow',
+        clean: disabled || loading 
+            ? 'bg-transparent text-gray-400 cursor-not-allowed' 
+            : 'bg-transparent text-white hover:bg-white/10'
     };
     
     const sizeClasses = {

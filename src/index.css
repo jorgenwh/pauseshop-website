@@ -27,4 +27,47 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+
+  /* Glow effect for deep search button */
+  .btn-glow {
+    position: relative;
+    z-index: 1;
+    isolation: isolate;
+  }
+
+  .btn-glow::after {
+    position: absolute;
+    content: "";
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    z-index: -1;
+    border-radius: inherit;
+    filter: blur(15px);
+    background: linear-gradient(
+      to left,
+      #ff5770,
+      #e4428d,
+      #c42da8,
+      #9e16c3,
+      #6501de,
+      #9e16c3,
+      #c42da8,
+      #e4428d,
+      #ff5770
+    );
+    background-size: 200% 200%;
+    animation: animateGlow 1.25s linear infinite;
+    opacity: 0.8;
+  }
+
+  @keyframes animateGlow {
+    0% {
+      background-position: 0% 50%;
+    }
+    100% {
+      background-position: 200% 50%;
+    }
+  }
 }

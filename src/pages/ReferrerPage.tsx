@@ -248,13 +248,13 @@ const ReferrerPage = (_props: ReferrerPageProps) => {
                         <>
                             <div className="absolute w-full flex justify-center space-x-4 -top-16 z-10">
                                 <Button
-                                    variant={!showDeepSearchView ? 'primary' : 'secondary'}
+                                    variant="secondary"
                                     onClick={handleOriginalItemsClick}
                                 >
                                     Original Items
                                 </Button>
                                 <Button
-                                    variant={showDeepSearchView ? 'primary' : 'secondary'}
+                                    variant={rankedProducts.length > 0 ? 'glow' : 'secondary'}
                                     onClick={handleDeepSearchClick}
                                     disabled={!deepSearchResultsReady || rankedProducts.length === 0}
                                 >

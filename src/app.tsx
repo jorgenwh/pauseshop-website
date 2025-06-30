@@ -19,43 +19,43 @@ const App = () => {
     return (
         <div className="min-h-screen bg-gray-900 text-gray-100">
             <Router>
-                <Routes>
-                    <Route 
-                        path="/"
-                        element={
-                            <UploadPage
-                                isLoading={isLoading}
-                                error={error}
-                                previewUrl={previewUrl}
-                                analysisCompleted={analysisCompleted}
-                                handleFileSelect={handleFileSelect}
-                                processImage={processImage}
-                                reset={reset}
-                            />
-                        }
-                    />
-                    <Route
-                        path="/results"
-                        element={
-                            <ResultsPage
-                                imageUrl={previewUrl}
-                                products={products}
-                                onReset={reset}
-                            />
-                        } 
-                    />
-                    <Route
-                        path="/referrer"
-                        element={
-                            <ReferrerPage
-                                onReset={reset}
-                            />
-                        }
-                    />
-                    <Route path="*" element={<Navigate to="/" replace />} />
-                </Routes>
-            </Router>
-        </div>
+                    <Routes>
+                        <Route 
+                            path="/"
+                            element={
+                                <UploadPage
+                                    isLoading={isLoading}
+                                    error={error}
+                                    previewUrl={previewUrl}
+                                    analysisCompleted={analysisCompleted}
+                                    handleFileSelect={handleFileSelect}
+                                    processImage={processImage}
+                                    reset={reset}
+                                />
+                            }
+                        />
+                        <Route
+                            path="/results"
+                            element={
+                                <ResultsPage
+                                    imageUrl={previewUrl}
+                                    products={products}
+                                    onReset={reset}
+                                />
+                            } 
+                        />
+                        <Route
+                            path="/referrer"
+                            element={
+                                <ReferrerPage
+                                    onReset={reset}
+                                />
+                            }
+                        />
+                        <Route path="*" element={<Navigate to="/" replace />} />
+                    </Routes>
+                </Router>
+            </div>
     );
 };
 

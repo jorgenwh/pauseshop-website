@@ -10,6 +10,7 @@ import { ProductList, ProductFilters } from '../features/product-display';
 import { AppHeader, Card, Button, EmptyState } from '../components/ui';
 import { Product, Category } from '../lib/types';
 import { TEXT } from '../lib/constants';
+import { Seo } from '../components/Seo';
 
 interface ResultsPageProps {
     imageUrl: string | null;
@@ -21,6 +22,7 @@ const ResultsPage = ({ imageUrl, products, onReset }: ResultsPageProps) => {
     const navigate = useNavigate();
     const [animateIn, setAnimateIn] = useState(false);
     const [selectedCategories, setSelectedCategories] = useState<Set<Category>>(new Set());
+
 
     // If there's no image, redirect back to the upload page
     useEffect(() => {
@@ -69,6 +71,12 @@ const ResultsPage = ({ imageUrl, products, onReset }: ResultsPageProps) => {
 
     return (
         <div className={`container mx-auto px-4 py-8 max-w-5xl transition-opacity duration-500 ${animateIn ? 'opacity-100' : 'opacity-0'}`}>
+            <Seo
+                title="Search Results"
+                description={`Found ${products.length} similar products for your uploaded image. Browse and compare items from top retailers.`}
+                canonical="/results"
+                robots="index, follow"
+            />
             <AppHeader subtitle={TEXT.resultsDescription} className="mb-8" />
 
             {/* Product Filters */}

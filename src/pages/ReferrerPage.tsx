@@ -33,7 +33,7 @@ const ReferrerPage = (_props: ReferrerPageProps) => {
     const [screenshotError, setScreenshotError] = useState<string | null>(null);
     const [deepSearchAttempted, setDeepSearchAttempted] = useState(false);
     const [deepSearchResultsReady, setDeepSearchResultsReady] = useState(false);
-    
+
     // Refs for button positioning
     const originalItemsButtonRef = useRef<HTMLButtonElement>(null);
     const deepSearchButtonRef = useRef<HTMLButtonElement>(null);
@@ -77,7 +77,7 @@ const ReferrerPage = (_props: ReferrerPageProps) => {
                 const originalRect = originalItemsButtonRef.current.getBoundingClientRect();
                 const deepSearchRect = deepSearchButtonRef.current.getBoundingClientRect();
                 const containerRect = originalItemsButtonRef.current.parentElement?.getBoundingClientRect();
-                
+
                 if (containerRect) {
                     setButtonDimensions({
                         originalWidth: originalRect.width,
@@ -102,7 +102,7 @@ const ReferrerPage = (_props: ReferrerPageProps) => {
         setScreenshotError(null);
         setDeepSearchAttempted(true);
         setDeepSearchResultsReady(false);
-        
+
         const startTime = Date.now();
 
         const { product, amazonProducts } = decodedData;
@@ -166,7 +166,7 @@ const ReferrerPage = (_props: ReferrerPageProps) => {
             // Calculate remaining time to reach 5 seconds
             const elapsedTime = Date.now() - startTime;
             const remainingTime = Math.max(0, 5000 - elapsedTime);
-            
+
             // Wait for the remaining time before showing results
             setTimeout(() => {
                 setIsRanking(false);
@@ -210,7 +210,7 @@ const ReferrerPage = (_props: ReferrerPageProps) => {
                 return;
             }
         }
-        
+
         // For original view or direct carousel clicks, use the provided index
         setSelectedProductIndex(index);
     };
@@ -265,7 +265,7 @@ const ReferrerPage = (_props: ReferrerPageProps) => {
                                 product={decodedData.product}
                                 amazonProduct={carouselProducts[selectedProductIndex]}
                             />
-                             {rankingError && (
+                            {rankingError && (
                                 <div className="text-red-500 text-center">{rankingError}</div>
                             )}
                         </div>
@@ -297,13 +297,13 @@ const ReferrerPage = (_props: ReferrerPageProps) => {
                                         Deep Search
                                     </Button>
                                     {/* Animated light bar */}
-                                    <div 
+                                    <div
                                         className="absolute -bottom-3 h-1 bg-gray-300 rounded-full transition-all duration-500 ease-out"
                                         style={{
-                                            left: !showDeepSearchView 
+                                            left: !showDeepSearchView
                                                 ? buttonDimensions.originalWidth * 0.1 // 10% offset to center 80% width bar
                                                 : buttonDimensions.deepSearchLeft + buttonDimensions.deepSearchWidth * 0.1,
-                                            width: !showDeepSearchView 
+                                            width: !showDeepSearchView
                                                 ? buttonDimensions.originalWidth * 0.8 // 80% of button width
                                                 : buttonDimensions.deepSearchWidth * 0.8
                                         }}

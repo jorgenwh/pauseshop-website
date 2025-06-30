@@ -9,6 +9,7 @@ import { ImagePreview } from '../features/image-upload';
 import { ProductDisplay } from '../features/product-display';
 import { ProductCarousel } from '../features/referrer';
 import { AppHeader, Card, Button } from '../components/ui';
+import AmazonAssociateDisclaimer from '../components/ui/AmazonAssociateDisclaimer';
 import { TEXT, CAROUSEL_CONFIG } from '../lib/constants';
 import { getScreenshot, rankProductsStreaming } from '../lib/api';
 import { imageUrlToBase64 as urlToBase64 } from '../lib/utils';
@@ -260,17 +261,18 @@ const ReferrerPage = (_props: ReferrerPageProps) => {
                 {/* Product Display Section */}
                 <div className="lg:col-span-2">
                     {decodedData && (
-                        <div className="space-y-6">
+                        <div>
                             <ProductDisplay
                                 product={decodedData.product}
                                 amazonProduct={carouselProducts[selectedProductIndex]}
                             />
-                            {rankingError && (
-                                <div className="text-red-500 text-center">{rankingError}</div>
-                            )}
-                        </div>
-                    )}
-                </div>
+                           <AmazonAssociateDisclaimer />
+                           {rankingError && (
+                               <div className="text-red-500 text-center mt-6">{rankingError}</div>
+                           )}
+                       </div>
+                   )}
+               </div>
 
                 {/* Product Carousel Section */}
                 <div className="lg:col-span-1 relative">

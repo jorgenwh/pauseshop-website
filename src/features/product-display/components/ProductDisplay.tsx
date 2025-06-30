@@ -13,7 +13,7 @@ interface ProductDisplayProps {
 
 const ProductDisplay = ({ product, amazonProduct }: ProductDisplayProps) => {
     return (
-        <Card className="flex flex-col lg:flex-row gap-6 p-6">
+        <Card className="flex flex-col lg:flex-row gap-6 p-6 mb-2">
             {/* Product Thumbnail */}
             <div className="flex-shrink-0 lg:w-96">
                 <div className="relative overflow-hidden rounded-lg bg-white aspect-square group">

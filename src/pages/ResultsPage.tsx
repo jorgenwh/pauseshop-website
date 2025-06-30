@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { ImagePreview } from '../features/image-upload';
 import { ProductList, ProductFilters } from '../features/product-display';
 import { AppHeader, Card, Button, EmptyState } from '../components/ui';
+import AmazonAssociateDisclaimer from '../components/ui/AmazonAssociateDisclaimer';
 import { Product, Category } from '../lib/types';
 import { TEXT } from '../lib/constants';
 import { Seo } from '../components/Seo';
@@ -102,6 +103,9 @@ const ResultsPage = ({ imageUrl, products, onReset }: ResultsPageProps) => {
                             {TEXT.newSearchButton}
                         </Button>
                     </Card>
+                    <div className="mt-2">
+                        <AmazonAssociateDisclaimer />
+                    </div>
                 </div>
 
                 {/* Right column - Products */}

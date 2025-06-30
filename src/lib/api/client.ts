@@ -77,12 +77,12 @@ export const analyzeImageStreaming = async (
                         buffer += chunk;
                         const lines = buffer.split("\n");
                         buffer = lines.pop() || ""; // Keep incomplete line in buffer
-                        
+
                         for (const line of lines) {
                             if (line.trim() === "") {
                                 continue;
                             }
-                            
+
                             if (line.startsWith("event: ")) {
                                 continue;
                             }
@@ -123,7 +123,7 @@ export const analyzeImageStreaming = async (
                                         } else if (parsedData.code === "RATE_LIMIT_EXCEEDED") {
                                             errorType = "rate_limit_error";
                                         }
-                                        
+
                                         const errorEvent = new CustomEvent(errorType, {
                                             detail: `${parsedData.code}: ${parsedData.message}`
                                         });
@@ -152,7 +152,7 @@ export const analyzeImageStreaming = async (
         if (error instanceof Error && error.name === 'AbortError') {
             throw error;
         }
-        
+
         callbacks.onError(new Event("connection_error"));
     }
 };

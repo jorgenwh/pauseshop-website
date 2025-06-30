@@ -3,7 +3,7 @@
  * Displays the pause screenshot and product results without filtering
  */
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ImagePreview } from '../features/image-upload';
 import { ProductDisplay } from '../features/product-display';
@@ -32,6 +32,16 @@ const ReferrerPage = (_props: ReferrerPageProps) => {
     const [showDeepSearchView, setShowDeepSearchView] = useState(false);
     const [screenshotError, setScreenshotError] = useState<string | null>(null);
     const [deepSearchAttempted, setDeepSearchAttempted] = useState(false);
+    const [deepSearchResultsReady, setDeepSearchResultsReady] = useState(false);
+    
+    // Refs for button positioning
+    const originalItemsButtonRef = useRef<HTMLButtonElement>(null);
+    const deepSearchButtonRef = useRef<HTMLButtonElement>(null);
+    const [buttonDimensions, setButtonDimensions] = useState({
+        originalWidth: 112,
+        deepSearchWidth: 96,
+        deepSearchLeft: 128
+    });
 
     const pauseId = searchParams.get('pauseId');
 
@@ -60,6 +70,29 @@ const ReferrerPage = (_props: ReferrerPageProps) => {
         return () => clearTimeout(timer);
     }, []);
 
+    // Calculate button dimensions for light bar positioning
+    useEffect(() => {
+        const updateButtonDimensions = () => {
+            if (originalItemsButtonRef.current && deepSearchButtonRef.current) {
+                const originalRect = originalItemsButtonRef.current.getBoundingClientRect();
+                const deepSearchRect = deepSearchButtonRef.current.getBoundingClientRect();
+                const containerRect = originalItemsButtonRef.current.parentElement?.getBoundingClientRect();
+                
+                if (containerRect) {
+                    setButtonDimensions({
+                        originalWidth: originalRect.width,
+                        deepSearchWidth: deepSearchRect.width,
+                        deepSearchLeft: deepSearchRect.left - containerRect.left
+                    });
+                }
+            }
+        };
+
+        // Update dimensions after component mounts and when text changes
+        const timer = setTimeout(updateButtonDimensions, 100);
+        return () => clearTimeout(timer);
+    }, [isRanking, rankingResults.length]); // Re-calculate when button text might change
+
     const handleDeepSearch = useCallback(async () => {
         if (!decodedData || !decodedData.product) return;
 
@@ -68,6 +101,9 @@ const ReferrerPage = (_props: ReferrerPageProps) => {
         setRankingError(null);
         setScreenshotError(null);
         setDeepSearchAttempted(true);
+        setDeepSearchResultsReady(false);
+        
+        const startTime = Date.now();
 
         const { product, amazonProducts } = decodedData;
 
@@ -127,7 +163,15 @@ const ReferrerPage = (_props: ReferrerPageProps) => {
             console.error("Deep Search failed:", error);
             setRankingError(error instanceof Error ? error.message : "An unknown error occurred.");
         } finally {
-            setIsRanking(false);
+            // Calculate remaining time to reach 5 seconds
+            const elapsedTime = Date.now() - startTime;
+            const remainingTime = Math.max(0, 5000 - elapsedTime);
+            
+            // Wait for the remaining time before showing results
+            setTimeout(() => {
+                setIsRanking(false);
+                setDeepSearchResultsReady(true);
+            }, remainingTime);
         }
     }, [decodedData, imageUrl, pauseId]);
 
@@ -232,20 +276,39 @@ const ReferrerPage = (_props: ReferrerPageProps) => {
                 <div className="lg:col-span-1 relative">
                     {decodedData && (
                         <>
-                            <div className="absolute w-full flex justify-center space-x-4 -top-16 z-10">
-                                <Button
-                                    variant={!showDeepSearchView ? 'primary' : 'secondary'}
-                                    onClick={handleOriginalItemsClick}
-                                >
-                                    Original Items
-                                </Button>
-                                <Button
-                                    variant={showDeepSearchView ? 'primary' : 'secondary'}
-                                    onClick={handleDeepSearchClick}
-                                    disabled={rankedProducts.length === 0}
-                                >
-                                    Deep Search
-                                </Button>
+                            <div className="absolute w-full flex justify-center -top-16 z-10">
+                                <div className="relative flex space-x-4">
+                                    <Button
+                                        ref={originalItemsButtonRef}
+                                        variant="secondary"
+                                        onClick={handleOriginalItemsClick}
+                                        className="relative"
+                                    >
+                                        Original Items
+                                    </Button>
+                                    <Button
+                                        ref={deepSearchButtonRef}
+                                        variant={isRanking || rankedProducts.length > 0 ? 'glow' : 'secondary'}
+                                        onClick={handleDeepSearchClick}
+                                        disabled={!deepSearchResultsReady || rankedProducts.length === 0}
+                                        loading={isRanking}
+                                        className="relative"
+                                    >
+                                        Deep Search
+                                    </Button>
+                                    {/* Animated light bar */}
+                                    <div 
+                                        className="absolute -bottom-3 h-1 bg-gray-300 rounded-full transition-all duration-500 ease-out"
+                                        style={{
+                                            left: !showDeepSearchView 
+                                                ? buttonDimensions.originalWidth * 0.1 // 10% offset to center 80% width bar
+                                                : buttonDimensions.deepSearchLeft + buttonDimensions.deepSearchWidth * 0.1,
+                                            width: !showDeepSearchView 
+                                                ? buttonDimensions.originalWidth * 0.8 // 80% of button width
+                                                : buttonDimensions.deepSearchWidth * 0.8
+                                        }}
+                                    />
+                                </div>
                             </div>
                             <div className="sticky top-4">
                                 <ProductCarousel

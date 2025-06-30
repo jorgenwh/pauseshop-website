@@ -1,7 +1,7 @@
 /**
  * Reusable button component with different variants
  */
-import { ReactNode } from 'react';
+import { ReactNode, forwardRef } from 'react';
 
 type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost' | 'glow' | 'clean';
 type ButtonSize = 'sm' | 'md' | 'lg';
@@ -18,7 +18,7 @@ interface ButtonProps {
     fullWidth?: boolean;
 }
 
-const Button = ({
+const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
     children,
     onClick,
     variant = 'primary',
@@ -28,7 +28,7 @@ const Button = ({
     className = '',
     type = 'button',
     fullWidth = false
-}: ButtonProps) => {
+}, ref) => {
     const baseClasses = 'font-medium rounded-md transition-colors flex items-center justify-center whitespace-nowrap';
     
     const variantClasses = {
@@ -64,6 +64,7 @@ const Button = ({
     
     return (
         <button
+            ref={ref}
             type={type}
             onClick={onClick}
             disabled={disabled || loading}
@@ -78,6 +79,8 @@ const Button = ({
             {children}
         </button>
     );
-};
+});
+
+Button.displayName = 'Button';
 
 export default Button;

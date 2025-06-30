@@ -72,3 +72,22 @@
   }
 
 }
+
+
+  .btn-glow-processing {
+    position: relative;
+    box-shadow: 0 0 8px rgba(209, 213, 219, 0.3), 0 0 15px rgba(209, 213, 219, 0.2);
+  }
+
+  .btn-glow-processing::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: 0.375rem; /* Corresponds to rounded-md */
+    background: radial-gradient(circle, rgba(209, 213, 219, 0.1) 0%, rgba(209, 213, 219, 0) 70%);
+    z-index: -1;
+    opacity: 0.7;
+  }

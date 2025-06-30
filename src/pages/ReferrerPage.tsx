@@ -290,12 +290,13 @@ const ReferrerPage = (_props: ReferrerPageProps) => {
                                     </Button>
                                     <Button
                                         ref={deepSearchButtonRef}
-                                        variant={rankedProducts.length > 0 ? 'glow' : 'secondary'}
+                                        variant={isRanking || rankedProducts.length > 0 ? 'glow' : 'secondary'}
                                         onClick={handleDeepSearchClick}
                                         disabled={!deepSearchResultsReady || rankedProducts.length === 0}
+                                        loading={isRanking}
                                         className="relative"
                                     >
-                                        {isRanking ? 'Deep Search (Processing...)' : 'Deep Search'}
+                                        Deep Search
                                     </Button>
                                     {/* Animated light bar */}
                                     <div 

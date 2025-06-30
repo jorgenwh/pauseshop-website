@@ -32,7 +32,6 @@ const ReferrerPage = (_props: ReferrerPageProps) => {
     const [showDeepSearchView, setShowDeepSearchView] = useState(false);
     const [screenshotError, setScreenshotError] = useState<string | null>(null);
     const [deepSearchAttempted, setDeepSearchAttempted] = useState(false);
-    const [deepSearchStartTime, setDeepSearchStartTime] = useState<number | null>(null);
     const [deepSearchResultsReady, setDeepSearchResultsReady] = useState(false);
     
     // Refs for button positioning
@@ -105,7 +104,6 @@ const ReferrerPage = (_props: ReferrerPageProps) => {
         setDeepSearchResultsReady(false);
         
         const startTime = Date.now();
-        setDeepSearchStartTime(startTime);
 
         const { product, amazonProducts } = decodedData;
 

@@ -3,6 +3,7 @@
  */
 
 import { Product } from "./types";
+import { AMAZON_AFFILIATE_TAG } from './constants';
 
 /**
  * Calculate base64 size more efficiently
@@ -270,7 +271,7 @@ export const constructAmazonSearchUrl = (product: Product): string => {
     // Use the searchTerms if available, otherwise use the product name
     const searchTerm = product.searchTerms || product.name;
     const encodedName = encodeURIComponent(searchTerm);
-    return `https://www.amazon.com/s?k=${encodedName}`;
+    return `https://www.amazon.com/s?k=${encodedName}&tag=${AMAZON_AFFILIATE_TAG}`;
 };
 
 

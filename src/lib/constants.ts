@@ -93,3 +93,5 @@ export const TIPS = {
         { key: '⌘+Shift+5', description: 'Screenshot options' },
     ],
 };
+
+export const AMAZON_AFFILIATE_TAG = 'pauseshop07-20';

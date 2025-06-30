@@ -43,6 +43,11 @@ export const UPLOAD_CONFIG = {
     maxSizeMB: 10,
 };
 
+// Carousel settings
+export const CAROUSEL_CONFIG = {
+    itemLimit: 5,
+};
+
 // App text content
 export const TEXT = {
     appName: 'PauseShop',

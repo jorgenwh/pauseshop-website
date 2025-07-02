@@ -77,11 +77,26 @@ export interface ExtensionProductStorage {
 }
 
 /**
+ * Represents a single entry in the click history, as defined in the extension.
+ */
+export interface ExtensionClickHistoryEntry {
+    pauseId: string;
+    clickedProduct: AmazonProduct;
+    productGroup: ExtensionProductGroup;
+}
+
+/**
+ * Represents the click history data retrieved from the extension's storage.
+ */
+export type ExtensionClickHistoryStorage = ExtensionClickHistoryEntry[];
+
+/**
  * Represents the data structure retrieved from the extension's storage.
  */
 export interface ExtensionData {
     clickedProduct: AmazonProduct | null;
     productStorage: ExtensionProductStorage | null;
+    clickHistory: ExtensionClickHistoryStorage | null;
 }
 
 

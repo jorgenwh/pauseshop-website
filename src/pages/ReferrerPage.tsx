@@ -6,13 +6,14 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { ImagePreview } from '../features/image-upload';
 import { ProductDisplay, ProductCarousel } from '../features/product-display';
+import ClickHistoryList from '../features/product-display/components/ClickHistoryList';
 import { AppHeader, Card, Button } from '../components/ui';
 import AmazonAssociateDisclaimer from '../components/ui/AmazonAssociateDisclaimer';
 import { TEXT, CAROUSEL_CONFIG } from '../lib/constants';
 import { getScreenshot, rankProductsStreaming } from '../lib/api';
 import { imageUrlToBase64 as urlToBase64 } from '../lib/utils';
 import { getExtensionData } from '../lib/browser-extensions';
-import { AmazonProduct, RankingResult, RankingRequest, Product } from '../lib/types';
+import { AmazonProduct, RankingResult, RankingRequest, Product, ExtensionClickHistoryEntry } from '../lib/types';
 
 const ReferrerPage = () => {
     const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -20,6 +21,7 @@ const ReferrerPage = () => {
     const [loadingDots, setLoadingDots] = useState('.');
     const [product, setProduct] = useState<Product | null>(null);
     const [amazonProducts, setAmazonProducts] = useState<AmazonProduct[]>([]);
+    const [clickHistory, setClickHistory] = useState<ExtensionClickHistoryEntry[]>([]);
     const [selectedProductIndex, setSelectedProductIndex] = useState(0);
     const [isRanking, setIsRanking] = useState(false);
     const [rankingResults, setRankingResults] = useState<RankingResult[]>([]);
@@ -43,6 +45,10 @@ const ReferrerPage = () => {
     useEffect(() => {
         const fetchExtensionData = async () => {
             const extensionData = await getExtensionData();
+
+            if (extensionData?.clickHistory) {
+                setClickHistory(extensionData.clickHistory);
+            }
 
             if (!extensionData?.productStorage || !extensionData.clickedProduct) {
                 return;
@@ -273,6 +279,7 @@ const ReferrerPage = () => {
                             </div>
                         )}
                     </Card>
+                    <ClickHistoryList history={clickHistory} />
                 </div>
 
                 {/* Product Display Section */}

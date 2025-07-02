@@ -37,7 +37,13 @@ export const getExtensionData = (): Promise<ExtensionData | null> => {
                         console.error('Error communicating with extension:', chrome.runtime.lastError.message);
                         resolve(null);
                     } else if (response && response.success) {
-                        resolve(response.data);
+                        // Adapt the data from the extension to the new format
+                        const extensionData = response.data;
+                        if (extensionData && extensionData.clickedProductInfo) {
+                            extensionData.clickedProduct = extensionData.clickedProductInfo.clickedProduct;
+                            delete extensionData.clickedProductInfo;
+                        }
+                        resolve(extensionData);
                     } else {
                         console.error('Failed to get data from extension:', response?.error);
                         resolve(null);

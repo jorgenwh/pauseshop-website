@@ -44,12 +44,12 @@ const ReferrerPage = () => {
         const fetchExtensionData = async () => {
             const extensionData = await getExtensionData();
 
-            if (!extensionData?.productStorage || !extensionData.clickedProductInfo) {
+            if (!extensionData?.productStorage || !extensionData.clickedProduct) {
                 return;
             }
 
             const { pauseId: storagePauseId, productGroups } = extensionData.productStorage;
-            const { clickedProduct } = extensionData.clickedProductInfo;
+            const clickedProduct = extensionData.clickedProduct;
 
             let screenshotUrl: string | null = null;
             if (storagePauseId) {
@@ -69,10 +69,7 @@ const ReferrerPage = () => {
 
             if (activeGroup) {
                 const mainProduct = activeGroup.product;
-                const activeAmazonProducts = activeGroup.scrapedProducts.map(p => ({
-                    ...p,
-                    productUrl: p.productUrl || null,
-                }));
+                const activeAmazonProducts = activeGroup.scrapedProducts;
                 const clickedIndex = activeAmazonProducts.findIndex(p => p.id === clickedProduct.id);
 
                 // Set state together

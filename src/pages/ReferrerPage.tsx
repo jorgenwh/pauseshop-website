@@ -199,6 +199,37 @@ const ReferrerPage = () => {
         }
     }, [product, amazonProducts, imageUrl, pauseId]);
 
+    const handleHistoryItemClick = async (item: ExtensionClickHistoryEntry) => {
+        // Set the new product and amazon products
+        setProduct(item.productGroup.product);
+        setAmazonProducts(item.productGroup.scrapedProducts);
+
+        // Find the index of the clicked product
+        const clickedIndex = item.productGroup.scrapedProducts.findIndex(p => p.id === item.clickedProduct.id);
+        setSelectedProductIndex(clickedIndex !== -1 ? clickedIndex : 0);
+
+        // Update the pauseId
+        setPauseId(item.pauseId);
+
+        // Fetch and set the new screenshot
+        setImageUrl(null); // Start loading state
+        setScreenshotError(null);
+        try {
+            const screenshotUrl = await getScreenshot(item.pauseId);
+            setImageUrl(screenshotUrl);
+        } catch (error) {
+            console.error("Failed to fetch screenshot for history item:", error);
+            setScreenshotError("Could not load the screenshot for this item.");
+        }
+
+        // Reset deep search view and scroll to top
+        setShowDeepSearchView(false);
+        setRankingResults([]);
+        setDeepSearchAttempted(false);
+        setDeepSearchResultsReady(false);
+        window.scrollTo(0, 0);
+    };
+
     useEffect(() => {
         if (!imageUrl) {
             const interval = setInterval(() => {
@@ -279,7 +310,7 @@ const ReferrerPage = () => {
                             </div>
                         )}
                     </Card>
-                    <ClickHistoryList history={clickHistory} />
+                    <ClickHistoryList history={clickHistory} onHistoryItemClick={handleHistoryItemClick} />
                 </div>
 
                 {/* Product Display Section */}

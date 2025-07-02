@@ -51,12 +51,11 @@ export interface Product {
  */
 export interface AmazonProduct {
     id: string;
-    imageId: string;
     amazonAsin?: string;
     price?: number;
     thumbnailUrl: string;
     productUrl: string | null;
-    position?: number;
+    position: number;
 }
 
 // --- Types for Browser Extension Communication ---
@@ -68,7 +67,7 @@ export interface ExtensionAmazonProduct {
     id: string;
     amazonAsin?: string;
     thumbnailUrl: string;
-    productUrl: string;
+    productUrl?: string;
     position: number;
     price?: number;
 }

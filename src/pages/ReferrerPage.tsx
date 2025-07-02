@@ -12,13 +12,9 @@ import { TEXT, CAROUSEL_CONFIG } from '../lib/constants';
 import { getScreenshot, rankProductsStreaming } from '../lib/api';
 import { imageUrlToBase64 as urlToBase64 } from '../lib/utils';
 import { getExtensionData } from '../lib/browser-extensions';
-import { AmazonProduct, RankingResult, RankingRequest, Product, ExtensionAmazonProduct } from '../lib/types';
+import { AmazonProduct, RankingResult, RankingRequest, Product } from '../lib/types';
 
-interface ReferrerPageProps {
-    onReset: () => void;
-}
-
-const ReferrerPage = (_props: ReferrerPageProps) => {
+const ReferrerPage = () => {
     const [imageUrl, setImageUrl] = useState<string | null>(null);
     const [animateIn, setAnimateIn] = useState(false);
     const [loadingDots, setLoadingDots] = useState('.');
@@ -47,7 +43,6 @@ const ReferrerPage = (_props: ReferrerPageProps) => {
     useEffect(() => {
         const fetchExtensionData = async () => {
             const extensionData = await getExtensionData();
-            console.log('Extension Data:', extensionData);
 
             if (!extensionData?.productStorage || !extensionData.clickedProductInfo) {
                 return;
@@ -74,9 +69,8 @@ const ReferrerPage = (_props: ReferrerPageProps) => {
 
             if (activeGroup) {
                 const mainProduct = activeGroup.product;
-                const activeAmazonProducts = activeGroup.scrapedProducts.map((p: ExtensionAmazonProduct) => ({
+                const activeAmazonProducts = activeGroup.scrapedProducts.map(p => ({
                     ...p,
-                    imageId: p.id, // Map id to imageId for compatibility
                     productUrl: p.productUrl || null,
                 }));
                 const clickedIndex = activeAmazonProducts.findIndex(p => p.id === clickedProduct.id);

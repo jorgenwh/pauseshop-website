@@ -53,7 +53,7 @@ const ProductDisplay = ({ product, amazonProduct }: ProductDisplayProps) => {
                             )}
                             <div className="flex justify-between items-center">
                                 <span className="text-gray-400">Confidence:</span>
-                                <span className="text-white">{(product.confidence * 100).toFixed(1)}%</span>
+                                <span className="text-white">{Math.round(product.confidence * 10)}%</span>
                             </div>
                             {product.secondaryColors.filter(color => !['unknown', 'other'].includes(color.toLowerCase())).length > 0 && (
                                 <div className="flex justify-between items-start">

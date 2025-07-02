@@ -29,21 +29,38 @@ import { ExtensionData } from './types';
 export const getExtensionData = (): Promise<ExtensionData | null> => {
     return new Promise((resolve) => {
         if (window.chrome && chrome.runtime) {
-            chrome.runtime.sendMessage(
-                EXTENSION_ID,
-                { command: 'getStorage' },
-                (response) => {
-                    if (chrome.runtime.lastError) {
-                        console.error('Error communicating with extension:', chrome.runtime.lastError.message);
-                        resolve(null);
-                    } else if (response && response.success) {
-                        resolve(response.data);
-                    } else {
-                        console.error('Failed to get data from extension:', response?.error);
-                        resolve(null);
+            try {
+                chrome.runtime.sendMessage(
+                    EXTENSION_ID,
+                    { command: 'getStorage' },
+                    (response) => {
+                        if (chrome.runtime.lastError) {
+                            // This will handle other runtime errors, but not the invalid ID error.
+                            console.error('Error communicating with extension:', chrome.runtime.lastError.message);
+                            resolve(null);
+                        } else if (response && response.success) {
+                            resolve(response.data);
+                        } else {
+                            // This case handles when the extension is found but returns an error.
+                            console.error('Failed to get data from extension:', response?.error);
+                            resolve(null);
+                        }
                     }
-                }
-            );
+                );
+            } catch (error) {
+                // This will catch the synchronous error thrown for an invalid extension ID.
+                console.error(
+                    `[PauseShop] Failed to connect to the extension. This might be because the EXTENSION_ID is incorrect.
+                    To fix this:
+                    1. Go to chrome://extensions in your browser.
+                    2. Find the PauseShop extension and copy its ID.
+                    3. Update the EXTENSION_ID in 'pauseshop-website/src/lib/constants.ts'.
+                    
+                    Error details:`,
+                    error
+                );
+                resolve(null);
+            }
         } else {
             // Extension not available
             resolve(null);

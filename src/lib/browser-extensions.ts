@@ -19,50 +19,46 @@ export const getBrowser = (): Browser => {
     return 'unknown';
 };
 
-import { EXTENSION_ID } from './constants';
 import { ExtensionData } from './types';
 
 /**
  * Retrieves data from the browser extension's storage.
+ * It dynamically gets the extension ID from the URL.
  * @returns A promise that resolves with the stored data, or null if the extension is not available.
  */
 export const getExtensionData = (): Promise<ExtensionData | null> => {
     return new Promise((resolve) => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const extensionId = urlParams.get('extensionId');
+
+        if (!extensionId) {
+            // If no extensionId is in the URL, we cannot proceed.
+            resolve(null);
+            return;
+        }
+
         if (window.chrome && chrome.runtime) {
-            try {
-                chrome.runtime.sendMessage(
-                    EXTENSION_ID,
-                    { command: 'getStorage' },
-                    (response) => {
-                        if (chrome.runtime.lastError) {
-                            // This will handle other runtime errors, but not the invalid ID error.
-                            console.error('Error communicating with extension:', chrome.runtime.lastError.message);
-                            resolve(null);
-                        } else if (response && response.success) {
-                            resolve(response.data);
-                        } else {
-                            // This case handles when the extension is found but returns an error.
-                            console.error('Failed to get data from extension:', response?.error);
-                            resolve(null);
-                        }
+            chrome.runtime.sendMessage(
+                extensionId,
+                { command: 'identify_and_get_data' },
+                (response: { app?: string; data?: ExtensionData }) => {
+                    if (chrome.runtime.lastError) {
+                        console.error(`Could not connect to extension with ID: ${extensionId}. Error: ${chrome.runtime.lastError.message}`);
+                        resolve(null);
+                        return;
                     }
-                );
-            } catch (error) {
-                // This will catch the synchronous error thrown for an invalid extension ID.
-                console.error(
-                    `[PauseShop] Failed to connect to the extension. This might be because the EXTENSION_ID is incorrect.
-                    To fix this:
-                    1. Go to chrome://extensions in your browser.
-                    2. Find the PauseShop extension and copy its ID.
-                    3. Update the EXTENSION_ID in 'pauseshop-website/src/lib/constants.ts'.
-                    
-                    Error details:`,
-                    error
-                );
-                resolve(null);
-            }
+
+                    // Verify the response is from our extension
+                    if (response && response.app === 'PauseShop' && response.data) {
+                        resolve(response.data);
+                    } else {
+                        console.warn(`Received an invalid response from extension ID: ${extensionId}.`);
+                        resolve(null);
+                    }
+                }
+            );
         } else {
-            // Extension not available
+            // Extension context not available
             resolve(null);
         }
     });

@@ -95,5 +95,3 @@ export const TIPS = {
 };
 
 export const AMAZON_AFFILIATE_TAG = 'pauseshop07-20';
-
-export const EXTENSION_ID = 'alcngpkfokbedebjnfmfojcibgemofdo';

@@ -18,3 +18,35 @@ export const getBrowser = (): Browser => {
     if (userAgent.includes('opr')) return 'opera';
     return 'unknown';
 };
+
+import { EXTENSION_ID } from './constants';
+import { ExtensionData } from './types';
+
+/**
+ * Retrieves data from the browser extension's storage.
+ * @returns A promise that resolves with the stored data, or null if the extension is not available.
+ */
+export const getExtensionData = (): Promise<ExtensionData | null> => {
+    return new Promise((resolve) => {
+        if (window.chrome && chrome.runtime) {
+            chrome.runtime.sendMessage(
+                EXTENSION_ID,
+                { command: 'getStorage' },
+                (response) => {
+                    if (chrome.runtime.lastError) {
+                        console.error('Error communicating with extension:', chrome.runtime.lastError.message);
+                        resolve(null);
+                    } else if (response && response.success) {
+                        resolve(response.data);
+                    } else {
+                        console.error('Failed to get data from extension:', response?.error);
+                        resolve(null);
+                    }
+                }
+            );
+        } else {
+            // Extension not available
+            resolve(null);
+        }
+    });
+};

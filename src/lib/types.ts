@@ -56,16 +56,52 @@ export interface AmazonProduct {
     price?: number;
     thumbnailUrl: string;
     productUrl: string | null;
+    position?: number;
+}
+
+// --- Types for Browser Extension Communication ---
+
+/**
+ * Represents a single Amazon product scraped from a search result, as defined in the extension.
+ */
+export interface ExtensionAmazonProduct {
+    id: string;
+    amazonAsin?: string;
+    thumbnailUrl: string;
+    productUrl: string;
+    position: number;
+    price?: number;
 }
 
 /**
- * Represents the fully decoded data from the referrer URL.
+ * Information about the product that was clicked in the sidebar, as defined in the extension.
  */
-export interface DecodedUrlData {
-    product?: Product;
-    clickedAmazonProduct: AmazonProduct;
-    clickedPosition: number;
-    amazonProducts: AmazonProduct[];
+export interface ExtensionClickedProductInfo {
+    clickedProduct: ExtensionAmazonProduct;
+}
+
+/**
+ * Represents a group of products associated with a single identified item, as defined in the extension.
+ */
+export interface ExtensionProductGroup {
+    product: Product;
+    scrapedProducts: ExtensionAmazonProduct[];
+}
+
+/**
+ * Represents the stored product data for a given pause session, as defined in the extension.
+ */
+export interface ExtensionProductStorage {
+    pauseId: string;
+    productGroups: ExtensionProductGroup[];
+}
+
+/**
+ * Represents the data structure retrieved from the extension's storage.
+ */
+export interface ExtensionData {
+    clickedProductInfo: ExtensionClickedProductInfo | null;
+    productStorage: ExtensionProductStorage | null;
 }
 
 

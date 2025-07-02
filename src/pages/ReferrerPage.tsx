@@ -4,7 +4,6 @@
  */
 
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import { ImagePreview } from '../features/image-upload';
 import { ProductDisplay, ProductCarousel } from '../features/product-display';
 import { AppHeader, Card, Button } from '../components/ui';
@@ -12,19 +11,19 @@ import AmazonAssociateDisclaimer from '../components/ui/AmazonAssociateDisclaime
 import { TEXT, CAROUSEL_CONFIG } from '../lib/constants';
 import { getScreenshot, rankProductsStreaming } from '../lib/api';
 import { imageUrlToBase64 as urlToBase64 } from '../lib/utils';
-import { decodeReferrerData } from '../lib/referrer';
-import { DecodedUrlData, AmazonProduct, RankingResult, RankingRequest } from '../lib/types';
+import { getExtensionData } from '../lib/browser-extensions';
+import { AmazonProduct, RankingResult, RankingRequest, Product, ExtensionAmazonProduct } from '../lib/types';
 
 interface ReferrerPageProps {
     onReset: () => void;
 }
 
 const ReferrerPage = (_props: ReferrerPageProps) => {
-    const [searchParams] = useSearchParams();
     const [imageUrl, setImageUrl] = useState<string | null>(null);
     const [animateIn, setAnimateIn] = useState(false);
     const [loadingDots, setLoadingDots] = useState('.');
-    const [decodedData, setDecodedData] = useState<DecodedUrlData | null>(null);
+    const [product, setProduct] = useState<Product | null>(null);
+    const [amazonProducts, setAmazonProducts] = useState<AmazonProduct[]>([]);
     const [selectedProductIndex, setSelectedProductIndex] = useState(0);
     const [isRanking, setIsRanking] = useState(false);
     const [rankingResults, setRankingResults] = useState<RankingResult[]>([]);
@@ -33,6 +32,7 @@ const ReferrerPage = (_props: ReferrerPageProps) => {
     const [screenshotError, setScreenshotError] = useState<string | null>(null);
     const [deepSearchAttempted, setDeepSearchAttempted] = useState(false);
     const [deepSearchResultsReady, setDeepSearchResultsReady] = useState(false);
+    const [pauseId, setPauseId] = useState<string | null>(null);
 
     // Refs for button positioning
     const originalItemsButtonRef = useRef<HTMLButtonElement>(null);
@@ -43,27 +43,55 @@ const ReferrerPage = (_props: ReferrerPageProps) => {
         deepSearchLeft: 128
     });
 
-    const pauseId = searchParams.get('pauseId');
 
     useEffect(() => {
-        const data = searchParams.get('data');
+        const fetchExtensionData = async () => {
+            const extensionData = await getExtensionData();
+            console.log('Extension Data:', extensionData);
 
-        if (pauseId) {
-            getScreenshot(pauseId).then(screenshotUrl => {
-                if (screenshotUrl) {
-                    setImageUrl(screenshotUrl);
-                }
-            });
-        }
-
-        if (data) {
-            const decoded = decodeReferrerData(data);
-            if (decoded) {
-                setDecodedData(decoded);
-                setSelectedProductIndex(decoded.clickedPosition);
+            if (!extensionData?.productStorage || !extensionData.clickedProductInfo) {
+                return;
             }
-        }
-    }, [searchParams, pauseId]);
+
+            const { pauseId: storagePauseId, productGroups } = extensionData.productStorage;
+            const { clickedProduct } = extensionData.clickedProductInfo;
+
+            let screenshotUrl: string | null = null;
+            if (storagePauseId) {
+                try {
+                    screenshotUrl = await getScreenshot(storagePauseId);
+                } catch (error) {
+                    console.error("Failed to fetch screenshot:", error);
+                    setScreenshotError("Could not load the screenshot.");
+                }
+            }
+
+            // Find the product group that contains the clicked product
+            const targetGroup = productGroups.find(pg => pg.scrapedProducts.some(p => p.id === clickedProduct.id));
+
+            // Fallback to the first group if the target isn't found, though it should not happen.
+            const activeGroup = targetGroup || (productGroups.length > 0 ? productGroups[0] : null);
+
+            if (activeGroup) {
+                const mainProduct = activeGroup.product;
+                const activeAmazonProducts = activeGroup.scrapedProducts.map((p: ExtensionAmazonProduct) => ({
+                    ...p,
+                    imageId: p.id, // Map id to imageId for compatibility
+                    productUrl: p.productUrl || null,
+                }));
+                const clickedIndex = activeAmazonProducts.findIndex(p => p.id === clickedProduct.id);
+
+                // Set state together
+                setPauseId(storagePauseId);
+                setImageUrl(screenshotUrl);
+                setProduct(mainProduct);
+                setAmazonProducts(activeAmazonProducts);
+                setSelectedProductIndex(clickedIndex !== -1 ? clickedIndex : 0);
+            }
+        };
+
+        fetchExtensionData();
+    }, []);
 
     useEffect(() => {
         const timer = setTimeout(() => setAnimateIn(true), 100);
@@ -94,7 +122,7 @@ const ReferrerPage = (_props: ReferrerPageProps) => {
     }, [isRanking, rankingResults.length]); // Re-calculate when button text might change
 
     const handleDeepSearch = useCallback(async () => {
-        if (!decodedData || !decodedData.product) return;
+        if (!product) return;
 
         setIsRanking(true);
         setRankingResults([]);
@@ -105,7 +133,6 @@ const ReferrerPage = (_props: ReferrerPageProps) => {
 
         const startTime = Date.now();
 
-        const { product, amazonProducts } = decodedData;
 
         const callRankApi = async (request: RankingRequest) => {
             return new Promise<void>((resolve, reject) => {
@@ -124,7 +151,7 @@ const ReferrerPage = (_props: ReferrerPageProps) => {
 
         try {
             const thumbnailPromises = amazonProducts.map(async (p: AmazonProduct) => ({
-                id: p.imageId,
+                id: String(p.position),
                 image: await urlToBase64(p.thumbnailUrl),
             }));
             const thumbnails = await Promise.all(thumbnailPromises);
@@ -173,7 +200,7 @@ const ReferrerPage = (_props: ReferrerPageProps) => {
                 setDeepSearchResultsReady(true);
             }, remainingTime);
         }
-    }, [decodedData, imageUrl, pauseId]);
+    }, [product, amazonProducts, imageUrl, pauseId]);
 
     useEffect(() => {
         if (!imageUrl) {
@@ -186,16 +213,16 @@ const ReferrerPage = (_props: ReferrerPageProps) => {
 
     // Automatically trigger deep search when decoded data is available
     useEffect(() => {
-        if (decodedData?.product && !isRanking && rankingResults.length === 0 && !deepSearchAttempted) {
+        if (product && !isRanking && rankingResults.length === 0 && !deepSearchAttempted) {
             handleDeepSearch();
         }
-    }, [decodedData, handleDeepSearch, isRanking, rankingResults.length, deepSearchAttempted]);
+    }, [product, handleDeepSearch, isRanking, rankingResults.length, deepSearchAttempted]);
 
     // Create ranked products array from ranking results
     const rankedProducts = rankingResults
         .map((ranking: RankingResult) => {
-            const product = decodedData?.amazonProducts.find((p: AmazonProduct) => p.id === ranking.id);
-            return product ? { ...product, ...ranking } : null;
+            const rankedProduct = amazonProducts.find((p: AmazonProduct) => String(p.position) === ranking.id);
+            return rankedProduct ? { ...rankedProduct, ...ranking } : null;
         })
         .filter((p): p is (AmazonProduct & RankingResult) => p !== null)
         .sort((a, b) => a.rank - b.rank);
@@ -216,7 +243,7 @@ const ReferrerPage = (_props: ReferrerPageProps) => {
     };
 
     // Determine which products to show in carousel
-    const carouselProducts = showDeepSearchView ? rankedProducts : (decodedData?.amazonProducts.slice(0, CAROUSEL_CONFIG.itemLimit) || []);
+    const carouselProducts = showDeepSearchView ? rankedProducts : (amazonProducts.slice(0, CAROUSEL_CONFIG.itemLimit) || []);
 
     const handleOriginalItemsClick = () => {
         setShowDeepSearchView(false);
@@ -259,23 +286,23 @@ const ReferrerPage = (_props: ReferrerPageProps) => {
 
                 {/* Product Display Section */}
                 <div className="lg:col-span-2">
-                    {decodedData && (
+                    {product && (
                         <div>
                             <ProductDisplay
-                                product={decodedData.product}
+                                product={product}
                                 amazonProduct={carouselProducts[selectedProductIndex]}
                             />
-                           <AmazonAssociateDisclaimer />
-                           {rankingError && (
-                               <div className="text-red-500 text-center mt-6">{rankingError}</div>
-                           )}
-                       </div>
-                   )}
-               </div>
+                            <AmazonAssociateDisclaimer />
+                            {rankingError && (
+                                <div className="text-red-500 text-center mt-6">{rankingError}</div>
+                            )}
+                        </div>
+                    )}
+                </div>
 
                 {/* Product Carousel Section */}
                 <div className="lg:col-span-1 relative">
-                    {decodedData && (
+                    {amazonProducts.length > 0 && (
                         <>
                             <div className="absolute w-full flex justify-center -top-16 z-10">
                                 <div className="relative flex space-x-4">

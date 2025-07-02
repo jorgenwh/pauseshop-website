@@ -18,15 +18,16 @@ declare global {
 }
 
 // Helper function to get base URL for the current environment
+// Get server environment from build-time variable, default to remote
+const serverEnv: ServerEnvironment = globalThis.__SERVER_ENV__ || 'remote';
+console.log(`Using server environment: ${serverEnv}`);
+const baseUrl = SERVER_URLS[serverEnv];
+
 export const getServerBaseUrl = (): string => {
-    // Get server environment from build-time variable, default to remote
-    const serverEnv: ServerEnvironment = globalThis.__SERVER_ENV__ || 'remote';
-    console.log(`Using server environment: ${serverEnv}`);
-    return SERVER_URLS[serverEnv];
+    return baseUrl;
 };
 
 // Helper function to get full endpoint URL
 export const getEndpointUrl = (endpoint: string): string => {
-    const baseUrl = getServerBaseUrl();
     return `${baseUrl}${endpoint}`;
 };

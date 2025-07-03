@@ -52,7 +52,7 @@ const ReferrerPage = () => {
         handleProductSelect,
         handleOriginalItemsClick,
         handleDeepSearchClick,
-        resetSelection,
+        resetViewOnly,
         setSelectedProductIndex,
     } = useProductSelection(amazonProducts, rankedProducts, isRanking, hasSavedDeepSearchData);
 
@@ -184,7 +184,8 @@ const ReferrerPage = () => {
         await updateHistoryItem(item);
 
         // Reset deep search view and auto-switch flag, then scroll to top
-        resetSelection();
+        // Note: Don't reset the selectedProductIndex as it should be preserved from the history item
+        resetViewOnly();
         resetDeepSearch();
         setShouldAutoSwitchToDeepSearch(false);
         window.scrollTo(0, 0);

@@ -29,7 +29,8 @@ export const useProductSelection = (
         if (hasSavedDeepSearchData || rankedProducts.length === 0) {
             // Always start with original items view when clicking different history items
             setShowDeepSearchView(false);
-            setSelectedProductIndex(0);
+            // Note: Don't reset selectedProductIndex here as it should be preserved 
+            // from the history item's clicked product index
         }
     }, [hasSavedDeepSearchData, rankedProducts.length]);
 
@@ -73,6 +74,11 @@ export const useProductSelection = (
         setManualDeepSearchTriggered(false); // Clear manual trigger flag when resetting
     };
 
+    const resetViewOnly = () => {
+        setShowDeepSearchView(false);
+        setManualDeepSearchTriggered(false); // Clear manual trigger flag when resetting
+    };
+
     return {
         selectedProductIndex,
         showDeepSearchView,
@@ -81,6 +87,7 @@ export const useProductSelection = (
         handleOriginalItemsClick,
         handleDeepSearchClick,
         resetSelection,
+        resetViewOnly,
         setSelectedProductIndex,
     };
 };

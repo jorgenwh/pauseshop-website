@@ -30,7 +30,7 @@ export const useExtensionData = () => {
         const newProduct = item.productGroup.product;
         const newAmazonProducts = item.productGroup.scrapedProducts;
 
-        // Find the index of the clicked product
+        // Find the index of the originally clicked product from the history entry
         const clickedIndex = newAmazonProducts.findIndex(p => p.id === item.clickedProduct.id);
         const newSelectedIndex = clickedIndex !== -1 ? clickedIndex : 0;
 

@@ -51,10 +51,6 @@ const ProductDisplay = ({ product, amazonProduct }: ProductDisplayProps) => {
                                     <span className="text-white capitalize">{product.targetGender}</span>
                                 </div>
                             )}
-                            <div className="flex justify-between items-center">
-                                <span className="text-gray-400">Confidence:</span>
-                                <span className="text-white">{Math.round(product.confidence * 10)}%</span>
-                            </div>
                             {product.secondaryColors.filter(color => !['unknown', 'other'].includes(color.toLowerCase())).length > 0 && (
                                 <div className="flex justify-between items-start">
                                     <span className="text-gray-400">Secondary Colors:</span>

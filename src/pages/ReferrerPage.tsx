@@ -6,7 +6,6 @@
 import { useEffect, useState } from 'react';
 import { AppHeader } from '../components/ui';
 import { ScreenshotSection, ProductDisplaySection, ProductCarouselSection } from '../components/sections';
-import { TEXT } from '../lib/constants';
 import { ExtensionClickHistoryEntry } from '../lib/types';
 import {
     useExtensionData,
@@ -51,7 +50,7 @@ const ReferrerPage = () => {
         handleDeepSearchClick,
         resetSelection,
         setSelectedProductIndex,
-    } = useProductSelection(amazonProducts, rankedProducts);
+    } = useProductSelection(amazonProducts, rankedProducts, isRanking);
 
     const {
         originalItemsButtonRef,
@@ -100,7 +99,7 @@ const ReferrerPage = () => {
 
     return (
         <div className={`container mx-auto px-4 py-8 max-w-7xl transition-opacity duration-500 ${animateIn ? 'opacity-100' : 'opacity-0'}`}>
-            <AppHeader subtitle={TEXT.resultsDescription} className="mb-8" showBrowserExtensionButton={false} />
+            <AppHeader className="mb-8" showBrowserExtensionButton={false} />
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 <ScreenshotSection

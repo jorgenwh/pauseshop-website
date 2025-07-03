@@ -12,6 +12,7 @@ interface DeepSearchState {
     hasAutoExecuted: boolean; // Track if deep search was auto-executed on initial load
     hasSavedDeepSearchData: boolean; // Track if current session has saved deep search data
     freshDeepSearchCompleted: boolean; // Track if deep search was just completed (not loaded from saved data)
+    savedDataCheckComplete: boolean; // Track if the saved data check has completed
 }
 
 export const useDeepSearch = (
@@ -31,6 +32,7 @@ export const useDeepSearch = (
         hasAutoExecuted: false,
         hasSavedDeepSearchData: false,
         freshDeepSearchCompleted: false,
+        savedDataCheckComplete: false,
     });
 
     const resetDeepSearch = () => {
@@ -43,6 +45,7 @@ export const useDeepSearch = (
             hasAutoExecuted: true, // Set to true to prevent auto-execution after reset
             hasSavedDeepSearchData: false,
             freshDeepSearchCompleted: false,
+            savedDataCheckComplete: false,
         });
     };
 
@@ -52,7 +55,8 @@ export const useDeepSearch = (
             setState(prev => ({ 
                 ...prev, 
                 hasSavedDeepSearchData: false,
-                freshDeepSearchCompleted: false // Reset when session changes
+                freshDeepSearchCompleted: false, // Reset when session changes
+                savedDataCheckComplete: false,
             }));
             return;
         }
@@ -78,7 +82,7 @@ export const useDeepSearch = (
             });
 
             if (savedRankingResults.length > 0) {
-                console.log(`[DeepSearch] Found saved deep search data for session ${pauseId}, loading ${savedRankingResults.length} ranked products`);
+                console.log(`[DeepSearch] Loading ${savedRankingResults.length} saved ranked products for session ${pauseId}`);
                 setState(prev => ({
                     ...prev,
                     rankingResults: savedRankingResults.sort((a, b) => a.rank - b.rank),
@@ -86,16 +90,19 @@ export const useDeepSearch = (
                     deepSearchResultsReady: true,
                     deepSearchAttempted: true,
                     freshDeepSearchCompleted: false, // This is loaded data, not freshly completed
+                    hasAutoExecuted: true, // Prevent auto-execution since we have saved data
+                    savedDataCheckComplete: true,
                 }));
                 return;
             }
         }
 
-        // No saved data found - reset flags
+        // No saved data found - mark check as complete but allow auto-execution
         setState(prev => ({ 
             ...prev, 
             hasSavedDeepSearchData: false,
-            freshDeepSearchCompleted: false 
+            freshDeepSearchCompleted: false,
+            savedDataCheckComplete: true,
         }));
     }, [pauseId, product, clickHistory]);
 
@@ -211,12 +218,25 @@ export const useDeepSearch = (
     const canPerformDeepSearch = !!(product && amazonProducts.length > 0 && imageUrl);
 
     // Automatically trigger deep search ONCE when decoded data is available on initial page load
+    // Only auto-execute AFTER the saved data check is complete and no saved data was found
     useEffect(() => {
-        if (canPerformDeepSearch && !state.isRanking && state.rankingResults.length === 0 && !state.deepSearchAttempted && !state.hasAutoExecuted && !state.hasSavedDeepSearchData) {
+        // Only auto-execute if:
+        // 1. We can perform deep search
+        // 2. The saved data check is complete 
+        // 3. No saved data was found
+        // 4. We haven't already attempted or auto-executed
+        if (canPerformDeepSearch && 
+            state.savedDataCheckComplete &&
+            !state.isRanking && 
+            state.rankingResults.length === 0 && 
+            !state.deepSearchAttempted && 
+            !state.hasAutoExecuted && 
+            !state.hasSavedDeepSearchData) {
+            console.log('[DeepSearch] Auto-executing deep search for new session');
             setState(prev => ({ ...prev, hasAutoExecuted: true }));
             handleDeepSearch();
         }
-    }, [canPerformDeepSearch, handleDeepSearch, state.isRanking, state.rankingResults.length, state.deepSearchAttempted, state.hasAutoExecuted, state.hasSavedDeepSearchData]);
+    }, [canPerformDeepSearch, handleDeepSearch, state.isRanking, state.rankingResults.length, state.deepSearchAttempted, state.hasAutoExecuted, state.hasSavedDeepSearchData, state.savedDataCheckComplete]);
 
     return {
         ...state,

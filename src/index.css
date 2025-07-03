@@ -90,9 +90,6 @@
     }
   }
 
-}
-
-
   .btn-glow-processing {
     position: relative;
     box-shadow: 0 0 8px rgba(209, 213, 219, 0.3), 0 0 15px rgba(209, 213, 219, 0.2);
@@ -110,3 +107,39 @@
     z-index: -1;
     opacity: 0.7;
   }
+
+  /* Grayscale glow effect for loading deep search button */
+  .btn-glow-grayscale {
+    position: relative;
+    z-index: 1;
+    isolation: isolate;
+  }
+
+  .btn-glow-grayscale::after {
+    position: absolute;
+    content: "";
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    z-index: -1;
+    border-radius: inherit;
+    filter: blur(12px);
+    background: linear-gradient(
+      to left,
+      #e5e7eb,
+      #d1d5db,
+      #9ca3af,
+      #6b7280,
+      #4b5563,
+      #6b7280,
+      #9ca3af,
+      #d1d5db,
+      #e5e7eb
+    );
+    background-size: 200% 200%;
+    animation: animateGlow 1.25s linear infinite;
+    opacity: 0.4;
+  }
+
+}

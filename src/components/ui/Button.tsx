@@ -3,7 +3,7 @@
  */
 import { ReactNode, forwardRef } from 'react';
 
-type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost' | 'glow' | 'clean' | 'outline' | 'extension';
+type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost' | 'glow' | 'glow-grayscale' | 'clean' | 'outline' | 'extension';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface ButtonProps {
@@ -49,6 +49,9 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
             : disabled
             ? 'bg-gray-700/70 text-gray-400 cursor-not-allowed'
             : 'bg-white text-gray-900 hover:bg-gray-100 btn-glow',
+        'glow-grayscale': disabled
+            ? 'bg-gray-700/70 text-gray-400 cursor-not-allowed btn-glow-grayscale'
+            : 'bg-white text-gray-900 btn-glow-grayscale',
         clean: disabled || loading 
             ? 'bg-transparent text-gray-400 cursor-not-allowed'
             : 'bg-transparent text-white hover:bg-white/10',

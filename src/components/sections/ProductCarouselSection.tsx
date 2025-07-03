@@ -53,9 +53,9 @@ const ProductCarouselSection: React.FC<ProductCarouselSectionProps> = ({
         
         if (isRanking) {
             return {
-                variant: 'secondary' as const,
+                variant: 'glow-grayscale' as const,
                 disabled: true,
-                loading: true,
+                loading: false,
                 text: 'Deep Search'
             };
         }

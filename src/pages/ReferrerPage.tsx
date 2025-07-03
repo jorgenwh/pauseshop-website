@@ -88,14 +88,6 @@ const ReferrerPage = () => {
                 return;
             }
 
-            // Create a unique identifier for this product group (pauseId + product name)
-            const productGroupId = `${pauseId}-${product.name}`;
-            
-            // Check if we've already processed this specific product group's deep search
-            if (processedDeepSearchSessions.has(productGroupId)) {
-                return;
-            }
-
             // Find the current product group in click history (match by pauseId AND product name)
             const currentSession = clickHistory.find(entry => 
                 entry.pauseId === pauseId && 
@@ -110,6 +102,14 @@ const ReferrerPage = () => {
             // Check if this specific product group already has deep search data
             if (currentSession.hasDeepSearch) {
                 console.log('[DeepSearch] This product group already has deep search data, skipping');
+                return;
+            }
+
+            // Create a unique identifier for this product group (pauseId + product name)
+            const productGroupId = `${pauseId}-${product.name}`;
+            
+            // Check if we've already processed this specific product group's deep search in this session
+            if (processedDeepSearchSessions.has(productGroupId)) {
                 return;
             }
 

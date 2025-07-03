@@ -59,7 +59,7 @@ const ProductCarouselSection: React.FC<ProductCarouselSectionProps> = ({
             return {
                 variant: 'glow-grayscale' as const,
                 disabled: true,
-                loading: true,
+                loading: false,
                 text: 'Deep Search'
             };
         }

@@ -135,7 +135,7 @@ export const useDeepSearch = (
                 }));
             }, remainingTime);
         }
-    }, [product, amazonProducts, imageUrl, pauseId]);
+    }, [product, amazonProducts, imageUrl, pauseId, onScreenshotError]);
 
     // Create ranked products array from ranking results
     const rankedProducts = state.rankingResults

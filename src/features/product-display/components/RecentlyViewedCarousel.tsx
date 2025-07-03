@@ -4,6 +4,7 @@
  */
 import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { ExtensionClickHistoryEntry, AmazonProduct } from '../../../lib/types';
+import Icon from '../../../components/ui/Icon';
 
 interface RecentlyViewedCarouselProps {
     history: ExtensionClickHistoryEntry[];
@@ -176,7 +177,18 @@ const RecentlyViewedCarousel = ({ history, onHistoryItemClick }: RecentlyViewedC
 
     return (
         <div className="mt-4">
-            <div className="relative h-[100px] overflow-hidden rounded-lg bg-gray-900">
+            <div className="flex items-center gap-4">
+                {/* Beautiful History Icon */}
+                <div className="flex-shrink-0 flex items-center justify-center w-12 h-12 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl shadow-sm border border-blue-100/50 hover:shadow-md transition-all duration-300 hover:scale-105">
+                    <Icon 
+                        name="history" 
+                        className="text-blue-600 drop-shadow-sm" 
+                        size={24} 
+                    />
+                </div>
+                
+                {/* History Carousel Container */}
+                <div className="flex-1 relative h-[100px] overflow-hidden rounded-lg bg-gray-900">
                 <div 
                     ref={scrollContainerRef}
                     className="h-full overflow-x-auto scrollbar-hide py-3"
@@ -221,6 +233,7 @@ const RecentlyViewedCarousel = ({ history, onHistoryItemClick }: RecentlyViewedC
                         {/* Spacer to ensure last item has enough scroll space */}
                         <div className="w-3 flex-shrink-0" />
                     </div>
+                </div>
                 </div>
             </div>
         </div>

@@ -19,7 +19,7 @@ export const getBrowser = (): Browser => {
     return 'unknown';
 };
 
-import { ExtensionData } from './types';
+import { ExtensionData, ExtensionClickHistoryEntry } from './types';
 
 /**
  * Retrieves data from the browser extension's storage.
@@ -60,6 +60,52 @@ export const getExtensionData = (): Promise<ExtensionData | null> => {
         } else {
             // Extension context not available
             resolve(null);
+        }
+    });
+};
+
+/**
+ * Updates the click history in the browser extension's storage.
+ * @param updatedHistory The updated click history array to send to the extension
+ * @returns A promise that resolves with success status
+ */
+export const updateExtensionClickHistory = (updatedHistory: ExtensionClickHistoryEntry[]): Promise<boolean> => {
+    return new Promise((resolve) => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const extensionId = urlParams.get('extensionId');
+
+        if (!extensionId) {
+            console.warn('No extension ID available, cannot update click history');
+            resolve(false);
+            return;
+        }
+
+        if (window.chrome && chrome.runtime) {
+            chrome.runtime.sendMessage(
+                extensionId,
+                { 
+                    command: 'update_click_history',
+                    clickHistory: updatedHistory 
+                },
+                (response: { app?: string; success?: boolean; error?: string }) => {
+                    if (chrome.runtime.lastError) {
+                        console.error(`Failed to update extension click history: ${chrome.runtime.lastError.message}`);
+                        resolve(false);
+                        return;
+                    }
+
+                    if (response && response.app === 'PauseShop' && response.success) {
+                        console.log('Successfully updated extension click history');
+                        resolve(true);
+                    } else {
+                        console.error('Failed to update extension click history:', response?.error || 'Unknown error');
+                        resolve(false);
+                    }
+                }
+            );
+        } else {
+            console.warn('Chrome extension context not available');
+            resolve(false);
         }
     });
 };

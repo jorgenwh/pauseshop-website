@@ -56,6 +56,9 @@ export interface AmazonProduct {
     thumbnailUrl: string;
     productUrl?: string | null;
     position: number;
+    // Deep search ranking data (only present if deep search was performed)
+    rank?: number;              // 1-N position from deep search
+    similarityScore?: number;   // 0-1 similarity score from deep search
 }
 
 // --- Types for Browser Extension Communication ---
@@ -83,6 +86,9 @@ export interface ExtensionClickHistoryEntry {
     pauseId: string;
     clickedProduct: AmazonProduct;
     productGroup: ExtensionProductGroup;
+    // Deep search metadata
+    hasDeepSearch?: boolean;    // Whether deep search was performed for this session
+    deepSearchTimestamp?: number; // When deep search was completed (Unix timestamp)
 }
 
 /**

@@ -80,6 +80,10 @@ export const useExtensionData = () => {
         setState(prev => ({ ...prev, screenshotError: error }));
     };
 
+    const updateClickHistory = (updatedHistory: ExtensionClickHistoryEntry[]) => {
+        setState(prev => ({ ...prev, clickHistory: updatedHistory }));
+    };
+
     useEffect(() => {
         const fetchExtensionData = async () => {
             const extensionData = await getExtensionData();
@@ -135,5 +139,6 @@ export const useExtensionData = () => {
         ...state,
         updateHistoryItem,
         setScreenshotError,
+        updateClickHistory,
     };
 };

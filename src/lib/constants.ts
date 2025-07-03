@@ -72,6 +72,7 @@ export const TEXT = {
     noProductsFound: 'No products were found in this image.',
     tryAnotherImage: 'Try Another Image',
     productsFoundSummary: (count: number) => `${count === 1 ? 'product' : 'products'} found in your image`,
+    screenshotExpired: 'Saved screenshot has expired.',
 };
 
 // Tips content

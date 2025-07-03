@@ -69,7 +69,7 @@ export const useExtensionData = () => {
                     clickHistory: refreshedClickHistory,
                 }));
             }
-        } catch (error) {
+        } catch {
             // Screenshot fetch failed - this is expected when screenshots expire
             setState(prev => ({
                 ...prev,
@@ -110,7 +110,7 @@ export const useExtensionData = () => {
             if (storagePauseId) {
                 try {
                     screenshotUrl = await getScreenshot(storagePauseId);
-                } catch (error) {
+                } catch {
                     // Screenshot fetch failed - this is expected when screenshots expire
                     setState(prev => ({ ...prev, screenshotError: "Could not load the screenshot." }));
                 }

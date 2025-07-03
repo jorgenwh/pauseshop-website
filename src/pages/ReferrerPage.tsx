@@ -178,7 +178,7 @@ const ReferrerPage = () => {
         };
 
         updateClickHistoryWithDeepSearch();
-    }, [freshDeepSearchCompleted, rankedProducts, pauseId, product]);
+    }, [freshDeepSearchCompleted, rankedProducts, pauseId, product, amazonProducts.length, clickHistory, processedDeepSearchSessions]);
 
     const handleHistoryItemClick = async (item: ExtensionClickHistoryEntry) => {
         await updateHistoryItem(item);

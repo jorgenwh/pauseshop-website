@@ -31,7 +31,7 @@ export const useProductSelection = (
             setShowDeepSearchView(false);
             setSelectedProductIndex(0);
         }
-    }, [hasSavedDeepSearchData]);
+    }, [hasSavedDeepSearchData, rankedProducts.length]);
 
     const handleProductSelect = (product: AmazonProduct, index: number) => {
         // If we're in deep search view and the product is clicked from RankingResults,

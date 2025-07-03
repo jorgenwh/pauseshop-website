@@ -19,7 +19,7 @@ const ReferrerPage = () => {
     const [animateIn, setAnimateIn] = useState(false);
     const [shouldAutoSwitchToDeepSearch, setShouldAutoSwitchToDeepSearch] = useState(false);
     const [processedDeepSearchSessions, setProcessedDeepSearchSessions] = useState<Set<string>>(new Set());
-    
+
     // Use custom hooks for data management
     const {
         imageUrl,
@@ -31,7 +31,6 @@ const ReferrerPage = () => {
         pauseId,
         updateHistoryItem,
         setScreenshotError,
-        updateClickHistory,
     } = useExtensionData();
 
     const {
@@ -90,16 +89,16 @@ const ReferrerPage = () => {
             }
 
             // Find the current product group in click history (match by pauseId AND product name)
-            const currentSession = clickHistory.find(entry => 
-                entry.pauseId === pauseId && 
+            const currentSession = clickHistory.find(entry =>
+                entry.pauseId === pauseId &&
                 entry.productGroup.product.name === product.name
             );
-            
+
             if (!currentSession) {
                 console.warn('Current product group not found in click history, cannot update with deep search data');
                 return;
             }
-            
+
             // Check if this specific product group already has deep search data
             if (currentSession.hasDeepSearch) {
                 console.log('[DeepSearch] This product group already has deep search data, skipping');
@@ -108,7 +107,7 @@ const ReferrerPage = () => {
 
             // Create a unique identifier for this product group (pauseId + product name)
             const productGroupId = `${pauseId}-${product.name}`;
-            
+
             // Check if we've already processed this specific product group's deep search in this session
             if (processedDeepSearchSessions.has(productGroupId)) {
                 return;
@@ -116,19 +115,18 @@ const ReferrerPage = () => {
 
             console.log(`[DeepSearch] Deep search completed! Updating click history with ${rankedProducts.length} ranked products for session ${pauseId} (product: ${product.name})`);
             console.log('[DeepSearch] Ranked products details:', rankedProducts);
-            console.log('[DeepSearch] Amazon products being ranked:', amazonProducts.length, amazonProducts.map(ap => ({ id: ap.id, position: ap.position })));
-            console.log('[DeepSearch] Scraped products in history:', currentSession.productGroup.scrapedProducts.length, currentSession.productGroup.scrapedProducts.map(sp => ({ id: sp.id, position: sp.position })));
+            console.log('[DeepSearch] Products being ranked:', amazonProducts.length, 'products');
 
             // Mark this product group as processed
             setProcessedDeepSearchSessions(prev => new Set(prev).add(productGroupId));
 
             // Find the current product group in click history
             const updatedHistory = [...clickHistory];
-            const currentSessionIndex = updatedHistory.findIndex(entry => 
-                entry.pauseId === pauseId && 
+            const currentSessionIndex = updatedHistory.findIndex(entry =>
+                entry.pauseId === pauseId &&
                 entry.productGroup.product.name === product.name
             );
-            
+
             if (currentSessionIndex === -1) {
                 console.warn('Current product group not found in click history, cannot update with deep search data');
                 return;
@@ -144,10 +142,10 @@ const ReferrerPage = () => {
                     scrapedProducts: currentSession.productGroup.scrapedProducts.map(scrapedProduct => {
                         // Find the ranking data for this product by position
                         // Note: rankedProducts have position-based matching, scrapedProducts have id-based matching
-                        const rankingData = rankedProducts.find(rankedProduct => 
+                        const rankingData = rankedProducts.find(rankedProduct =>
                             rankedProduct.position === scrapedProduct.position
                         );
-                        
+
                         if (rankingData) {
                             console.log(`[DeepSearch] ✅ Adding ranking data to product ${scrapedProduct.id} (position ${scrapedProduct.position}): rank ${rankingData.rank}, similarity ${rankingData.similarityScore}`);
                             return {
@@ -156,9 +154,9 @@ const ReferrerPage = () => {
                                 similarityScore: rankingData.similarityScore,
                             };
                         } else {
-                            console.log(`[DeepSearch] ❌ No ranking data found for product ${scrapedProduct.id} (position ${scrapedProduct.position})`);
+                            // console.log(`[DeepSearch] ❌ No ranking data found for product ${scrapedProduct.id} (position ${scrapedProduct.position})`);
                         }
-                        
+
                         return scrapedProduct;
                     }),
                 },
@@ -169,11 +167,11 @@ const ReferrerPage = () => {
             // Send the updated history back to the extension
             console.log('[DeepSearch] Sending updated click history to extension...');
             const success = await updateExtensionClickHistory(updatedHistory);
-            
+
             if (success) {
                 console.log('Successfully updated extension click history with deep search results');
-                // Also update local state to reflect the changes
-                updateClickHistory(updatedHistory);
+                // Note: We don't update local state here to avoid triggering the useDeepSearch effect again
+                // The extension should be the source of truth for click history data
             } else {
                 console.warn('Failed to update extension click history with deep search results');
             }
@@ -184,7 +182,7 @@ const ReferrerPage = () => {
 
     const handleHistoryItemClick = async (item: ExtensionClickHistoryEntry) => {
         await updateHistoryItem(item);
-        
+
         // Reset deep search view and auto-switch flag, then scroll to top
         resetSelection();
         resetDeepSearch();

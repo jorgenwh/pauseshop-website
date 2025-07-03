@@ -37,6 +37,10 @@ export const useExtensionData = () => {
         // Update the pauseId
         const newPauseId = item.pauseId;
 
+        // Refresh click history from extension to get latest deep search data
+        const extensionData = await getExtensionData();
+        const refreshedClickHistory = extensionData?.clickHistory || [];
+
         // Fetch and set the new screenshot
         setState(prev => ({ ...prev, imageUrl: null, screenshotError: null }));
         
@@ -51,6 +55,7 @@ export const useExtensionData = () => {
                     selectedProductIndex: newSelectedIndex,
                     pauseId: newPauseId,
                     imageUrl: screenshotUrl,
+                    clickHistory: refreshedClickHistory,
                 }));
             } else {
                 // Screenshot not found or failed to fetch
@@ -61,10 +66,11 @@ export const useExtensionData = () => {
                     selectedProductIndex: newSelectedIndex,
                     pauseId: newPauseId,
                     screenshotError: TEXT.screenshotExpired,
+                    clickHistory: refreshedClickHistory,
                 }));
             }
         } catch (error) {
-            console.error("Failed to fetch screenshot for history item:", error);
+            // Screenshot fetch failed - this is expected when screenshots expire
             setState(prev => ({
                 ...prev,
                 product: newProduct,
@@ -72,6 +78,7 @@ export const useExtensionData = () => {
                 selectedProductIndex: newSelectedIndex,
                 pauseId: newPauseId,
                 screenshotError: TEXT.screenshotExpired,
+                clickHistory: refreshedClickHistory,
             }));
         }
     };
@@ -104,7 +111,7 @@ export const useExtensionData = () => {
                 try {
                     screenshotUrl = await getScreenshot(storagePauseId);
                 } catch (error) {
-                    console.error("Failed to fetch screenshot:", error);
+                    // Screenshot fetch failed - this is expected when screenshots expire
                     setState(prev => ({ ...prev, screenshotError: "Could not load the screenshot." }));
                 }
             }

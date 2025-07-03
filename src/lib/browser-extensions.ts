@@ -83,9 +83,9 @@ export const updateExtensionClickHistory = (updatedHistory: ExtensionClickHistor
         if (window.chrome && chrome.runtime) {
             chrome.runtime.sendMessage(
                 extensionId,
-                { 
+                {
                     command: 'update_click_history',
-                    clickHistory: updatedHistory 
+                    clickHistory: updatedHistory
                 },
                 (response: { app?: string; success?: boolean; error?: string }) => {
                     if (chrome.runtime.lastError) {
@@ -95,7 +95,6 @@ export const updateExtensionClickHistory = (updatedHistory: ExtensionClickHistor
                     }
 
                     if (response && response.app === 'PauseShop' && response.success) {
-                        console.log('Successfully updated extension click history');
                         resolve(true);
                     } else {
                         console.error('Failed to update extension click history:', response?.error || 'Unknown error');

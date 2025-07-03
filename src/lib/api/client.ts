@@ -167,7 +167,7 @@ export const getScreenshot = async (sessionId: string): Promise<string | null> =
         const response = await fetch(url);
 
         if (!response.ok) {
-            console.error(`Failed to fetch screenshot: ${response.status} ${response.statusText}`);
+            // Screenshot not found - this is expected when screenshots expire
             return null;
         }
 

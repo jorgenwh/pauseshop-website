@@ -167,19 +167,25 @@ export const getScreenshot = async (sessionId: string): Promise<string | null> =
         const response = await fetch(url);
 
         if (!response.ok) {
-            // Screenshot not found - this is expected when screenshots expire
+            // Log unexpected HTTP errors (500, network issues, etc.)
+            console.warn(`Unexpected error fetching screenshot (${response.status}):`, response.statusText);
             return null;
         }
 
         const data = await response.json();
 
+        // Handle both old and new response formats
         if (data.success && data.screenshot) {
             return data.screenshot;
+        } else if (!data.success && data.code === 'SCREENSHOT_EXPIRED') {
+            // Screenshot expired - this is expected, no need to log
+            return null;
         }
 
         return null;
     } catch (error) {
-        console.error('Error fetching screenshot:', error);
+        // Only log actual network/connection errors
+        console.error('Network error fetching screenshot:', error);
         return null;
     }
 };

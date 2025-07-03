@@ -56,14 +56,10 @@ const RecentlyViewedCarousel = ({ history, onHistoryItemClick }: RecentlyViewedC
             // Subtle scale effect for depth
             const scale = index === selectedIndex ? 1.1 : (1 - normalizedDistance * 0.05);
             
-            // Blur effect for distant items
-            const blur = normalizedDistance > 0.7 ? 2 : 0;
-            
             newStyles[index] = {
                 opacity,
                 transform: `scale(${scale})`,
-                filter: blur > 0 ? `blur(${blur}px)` : 'none',
-                transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), filter 0.3s ease-out',
+                transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             };
         });
 
@@ -166,10 +162,10 @@ const RecentlyViewedCarousel = ({ history, onHistoryItemClick }: RecentlyViewedC
     };
 
     const getItemSpacing = (index: number) => {
-        if (index === selectedIndex - 1) {
-            return 'mr-8';
-        } else if (index === selectedIndex) {
-            return 'mr-8';
+        if (index === selectedIndex) {
+            return 'mr-4';
+        } else if (index === selectedIndex - 1) {
+            return 'mr-4';
         }
         return 'mr-3';
     };
@@ -181,9 +177,6 @@ const RecentlyViewedCarousel = ({ history, onHistoryItemClick }: RecentlyViewedC
     return (
         <div className="mt-4">
             <div className="relative h-[100px] overflow-hidden rounded-lg bg-gray-900">
-                <div className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-gray-900 via-gray-900/80 to-transparent z-10 pointer-events-none" />
-                <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-gray-900 via-gray-900/80 to-transparent z-10 pointer-events-none" />
-                
                 <div 
                     ref={scrollContainerRef}
                     className="h-full overflow-x-auto scrollbar-hide py-3"
@@ -193,7 +186,7 @@ const RecentlyViewedCarousel = ({ history, onHistoryItemClick }: RecentlyViewedC
                         scrollBehavior: 'auto'
                     }}
                 >
-                    <div className="flex px-8">
+                    <div className="flex pl-8 pr-12">
                         {carouselProducts.map((product, index) => (
                             <div
                                 key={product.id}
@@ -225,6 +218,8 @@ const RecentlyViewedCarousel = ({ history, onHistoryItemClick }: RecentlyViewedC
                                 </div>
                             </div>
                         ))}
+                        {/* Spacer to ensure last item has enough scroll space */}
+                        <div className="w-3 flex-shrink-0" />
                     </div>
                 </div>
             </div>

@@ -14,6 +14,7 @@ interface ProductCarouselSectionProps {
     isRanking: boolean;
     rankedProductsLength: number;
     canPerformDeepSearch: boolean;
+    hasSavedDeepSearchData: boolean;
     originalItemsButtonRef: React.RefObject<HTMLButtonElement | null>;
     deepSearchButtonRef: React.RefObject<HTMLButtonElement | null>;
     buttonDimensions: {
@@ -34,6 +35,7 @@ const ProductCarouselSection: React.FC<ProductCarouselSectionProps> = ({
     isRanking,
     rankedProductsLength,
     canPerformDeepSearch,
+    hasSavedDeepSearchData,
     originalItemsButtonRef,
     deepSearchButtonRef,
     buttonDimensions,
@@ -42,7 +44,8 @@ const ProductCarouselSection: React.FC<ProductCarouselSectionProps> = ({
 
     // Determine deep search button state
     const getDeepSearchButtonState = () => {
-        if (!canPerformDeepSearch) {
+        // No image available mode: no image and no saved ranked history
+        if (!canPerformDeepSearch && !hasSavedDeepSearchData) {
             return {
                 variant: 'secondary' as const,
                 disabled: true,
@@ -51,16 +54,18 @@ const ProductCarouselSection: React.FC<ProductCarouselSectionProps> = ({
             };
         }
         
+        // Loading state when ranking is in progress
         if (isRanking) {
             return {
                 variant: 'glow-grayscale' as const,
                 disabled: true,
-                loading: false,
+                loading: true,
                 text: 'Deep Search'
             };
         }
         
-        if (rankedProductsLength > 0) {
+        // Results available mode: ranked results exist (from current session or saved history)
+        if (rankedProductsLength > 0 || hasSavedDeepSearchData) {
             return {
                 variant: 'glow' as const,
                 disabled: false,
@@ -69,6 +74,17 @@ const ProductCarouselSection: React.FC<ProductCarouselSectionProps> = ({
             };
         }
         
+        // Deep search available mode: has image but no saved ranked data
+        if (canPerformDeepSearch && !hasSavedDeepSearchData) {
+            return {
+                variant: 'secondary' as const,
+                disabled: false,
+                loading: false,
+                text: 'Deep Search'
+            };
+        }
+        
+        // Fallback (should not reach here normally)
         return {
             variant: 'secondary' as const,
             disabled: false,

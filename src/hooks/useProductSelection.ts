@@ -2,7 +2,12 @@ import { useState, useEffect } from 'react';
 import { AmazonProduct, RankingResult } from '../lib/types';
 import { CAROUSEL_CONFIG } from '../lib/constants';
 
-export const useProductSelection = (amazonProducts: AmazonProduct[], rankedProducts: (AmazonProduct & RankingResult)[], isRanking?: boolean) => {
+export const useProductSelection = (
+    amazonProducts: AmazonProduct[], 
+    rankedProducts: (AmazonProduct & RankingResult)[], 
+    isRanking?: boolean,
+    hasSavedDeepSearchData?: boolean
+) => {
     const [selectedProductIndex, setSelectedProductIndex] = useState(0);
     const [showDeepSearchView, setShowDeepSearchView] = useState(false);
     const [wasRanking, setWasRanking] = useState(false);
@@ -18,6 +23,15 @@ export const useProductSelection = (amazonProducts: AmazonProduct[], rankedProdu
         }
         setWasRanking(isRanking || false);
     }, [isRanking, rankedProducts.length, wasRanking, manualDeepSearchTriggered]);
+
+    // Reset to original view when session changes (when saved data loads or products change)
+    useEffect(() => {
+        if (hasSavedDeepSearchData || rankedProducts.length === 0) {
+            // Always start with original items view when clicking different history items
+            setShowDeepSearchView(false);
+            setSelectedProductIndex(0);
+        }
+    }, [hasSavedDeepSearchData]);
 
     const handleProductSelect = (product: AmazonProduct, index: number) => {
         // If we're in deep search view and the product is clicked from RankingResults,

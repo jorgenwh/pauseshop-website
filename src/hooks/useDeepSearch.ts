@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { rankProductsStreaming } from '../lib/api';
 import { imageUrlToBase64 as urlToBase64 } from '../lib/utils';
-import { AmazonProduct, RankingResult, RankingRequest, Product } from '../lib/types';
+import { AmazonProduct, RankingResult, RankingRequest, Product, ExtensionClickHistoryEntry } from '../lib/types';
 
 interface DeepSearchState {
     isRanking: boolean;
@@ -10,6 +10,8 @@ interface DeepSearchState {
     deepSearchAttempted: boolean;
     deepSearchResultsReady: boolean;
     hasAutoExecuted: boolean; // Track if deep search was auto-executed on initial load
+    hasSavedDeepSearchData: boolean; // Track if current session has saved deep search data
+    freshDeepSearchCompleted: boolean; // Track if deep search was just completed (not loaded from saved data)
 }
 
 export const useDeepSearch = (
@@ -17,7 +19,8 @@ export const useDeepSearch = (
     amazonProducts: AmazonProduct[],
     imageUrl: string | null,
     pauseId: string | null,
-    onScreenshotError?: (error: string) => void
+    onScreenshotError?: (error: string) => void,
+    clickHistory: ExtensionClickHistoryEntry[] = [] // Add click history parameter
 ) => {
     const [state, setState] = useState<DeepSearchState>({
         isRanking: false,
@@ -26,6 +29,8 @@ export const useDeepSearch = (
         deepSearchAttempted: false,
         deepSearchResultsReady: false,
         hasAutoExecuted: false,
+        hasSavedDeepSearchData: false,
+        freshDeepSearchCompleted: false,
     });
 
     const resetDeepSearch = () => {
@@ -36,8 +41,63 @@ export const useDeepSearch = (
             deepSearchAttempted: false,
             deepSearchResultsReady: false,
             hasAutoExecuted: true, // Set to true to prevent auto-execution after reset
+            hasSavedDeepSearchData: false,
+            freshDeepSearchCompleted: false,
         });
     };
+
+    // Check for saved deep search data when session or history changes
+    useEffect(() => {
+        if (!pauseId || !product || !clickHistory.length) {
+            setState(prev => ({ 
+                ...prev, 
+                hasSavedDeepSearchData: false,
+                freshDeepSearchCompleted: false // Reset when session changes
+            }));
+            return;
+        }
+
+        // Find the current session in click history
+        const currentSession = clickHistory.find(entry => 
+            entry.pauseId === pauseId && 
+            entry.productGroup.product.name === product.name
+        );
+
+        if (currentSession?.hasDeepSearch) {
+            // Load saved ranking data from the session's scraped products
+            const savedRankingResults: RankingResult[] = [];
+            
+            currentSession.productGroup.scrapedProducts.forEach(scrapedProduct => {
+                if (scrapedProduct.rank !== undefined && scrapedProduct.similarityScore !== undefined) {
+                    savedRankingResults.push({
+                        id: String(scrapedProduct.position),
+                        rank: scrapedProduct.rank,
+                        similarityScore: scrapedProduct.similarityScore,
+                    });
+                }
+            });
+
+            if (savedRankingResults.length > 0) {
+                console.log(`[DeepSearch] Found saved deep search data for session ${pauseId}, loading ${savedRankingResults.length} ranked products`);
+                setState(prev => ({
+                    ...prev,
+                    rankingResults: savedRankingResults.sort((a, b) => a.rank - b.rank),
+                    hasSavedDeepSearchData: true,
+                    deepSearchResultsReady: true,
+                    deepSearchAttempted: true,
+                    freshDeepSearchCompleted: false, // This is loaded data, not freshly completed
+                }));
+                return;
+            }
+        }
+
+        // No saved data found - reset flags
+        setState(prev => ({ 
+            ...prev, 
+            hasSavedDeepSearchData: false,
+            freshDeepSearchCompleted: false 
+        }));
+    }, [pauseId, product, clickHistory]);
 
     const handleDeepSearch = useCallback(async () => {
         if (!product) return;
@@ -132,6 +192,7 @@ export const useDeepSearch = (
                     ...prev,
                     isRanking: false,
                     deepSearchResultsReady: true,
+                    freshDeepSearchCompleted: true, // Mark as freshly completed
                 }));
             }, remainingTime);
         }
@@ -151,11 +212,11 @@ export const useDeepSearch = (
 
     // Automatically trigger deep search ONCE when decoded data is available on initial page load
     useEffect(() => {
-        if (canPerformDeepSearch && !state.isRanking && state.rankingResults.length === 0 && !state.deepSearchAttempted && !state.hasAutoExecuted) {
+        if (canPerformDeepSearch && !state.isRanking && state.rankingResults.length === 0 && !state.deepSearchAttempted && !state.hasAutoExecuted && !state.hasSavedDeepSearchData) {
             setState(prev => ({ ...prev, hasAutoExecuted: true }));
             handleDeepSearch();
         }
-    }, [canPerformDeepSearch, handleDeepSearch, state.isRanking, state.rankingResults.length, state.deepSearchAttempted, state.hasAutoExecuted]);
+    }, [canPerformDeepSearch, handleDeepSearch, state.isRanking, state.rankingResults.length, state.deepSearchAttempted, state.hasAutoExecuted, state.hasSavedDeepSearchData]);
 
     return {
         ...state,

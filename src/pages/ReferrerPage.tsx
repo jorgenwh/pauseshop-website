@@ -39,11 +39,12 @@ const ReferrerPage = () => {
         rankingResults,
         rankingError,
         rankedProducts,
-        deepSearchResultsReady,
         resetDeepSearch,
         canPerformDeepSearch,
         handleDeepSearch,
-    } = useDeepSearch(product, amazonProducts, imageUrl, pauseId, setScreenshotError);
+        hasSavedDeepSearchData,
+        freshDeepSearchCompleted,
+    } = useDeepSearch(product, amazonProducts, imageUrl, pauseId, setScreenshotError, clickHistory);
 
     const {
         selectedProductIndex,
@@ -54,7 +55,7 @@ const ReferrerPage = () => {
         handleDeepSearchClick,
         resetSelection,
         setSelectedProductIndex,
-    } = useProductSelection(amazonProducts, rankedProducts, isRanking);
+    } = useProductSelection(amazonProducts, rankedProducts, isRanking, hasSavedDeepSearchData);
 
     const {
         originalItemsButtonRef,
@@ -83,8 +84,8 @@ const ReferrerPage = () => {
     // Update click history with deep search results when ranking completes
     useEffect(() => {
         const updateClickHistoryWithDeepSearch = async () => {
-            // Only proceed if deep search is completely finished and we have results
-            if (!deepSearchResultsReady || rankedProducts.length === 0 || !pauseId || !product) {
+            // Only proceed if deep search was freshly completed (not loaded from saved data) and we have results
+            if (!freshDeepSearchCompleted || rankedProducts.length === 0 || !pauseId || !product) {
                 return;
             }
 
@@ -179,7 +180,7 @@ const ReferrerPage = () => {
         };
 
         updateClickHistoryWithDeepSearch();
-    }, [deepSearchResultsReady, rankedProducts, pauseId, product]);
+    }, [freshDeepSearchCompleted, rankedProducts, pauseId, product]);
 
     const handleHistoryItemClick = async (item: ExtensionClickHistoryEntry) => {
         await updateHistoryItem(item);
@@ -231,6 +232,7 @@ const ReferrerPage = () => {
                     isRanking={isRanking}
                     rankedProductsLength={rankedProducts.length}
                     canPerformDeepSearch={canPerformDeepSearch}
+                    hasSavedDeepSearchData={hasSavedDeepSearchData}
                     originalItemsButtonRef={originalItemsButtonRef}
                     deepSearchButtonRef={deepSearchButtonRef}
                     buttonDimensions={buttonDimensions}

@@ -105,14 +105,14 @@ const ReferrerPage = () => {
                 <ScreenshotSection
                     imageUrl={imageUrl}
                     screenshotError={screenshotError}
-                    clickHistory={clickHistory}
-                    onHistoryItemClick={handleHistoryItemClick}
                 />
 
                 <ProductDisplaySection
                     product={product}
                     selectedProduct={carouselProducts[selectedProductIndex]}
                     rankingError={rankingError}
+                    clickHistory={clickHistory}
+                    onHistoryItemClick={handleHistoryItemClick}
                 />
 
                 <ProductCarouselSection

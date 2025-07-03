@@ -1,21 +1,15 @@
 import React from 'react';
 import { ImagePreview } from '../../features/image-upload';
 import { Card } from '../ui';
-import ClickHistoryList from '../../features/product-display/components/ClickHistoryList';
-import { ExtensionClickHistoryEntry } from '../../lib/types';
 
 interface ScreenshotSectionProps {
     imageUrl: string | null;
     screenshotError: string | null;
-    clickHistory: ExtensionClickHistoryEntry[];
-    onHistoryItemClick: (item: ExtensionClickHistoryEntry) => void;
 }
 
 const ScreenshotSection: React.FC<ScreenshotSectionProps> = ({
     imageUrl,
     screenshotError,
-    clickHistory,
-    onHistoryItemClick,
 }) => {
     return (
         <div className="lg:col-span-1">
@@ -35,7 +29,6 @@ const ScreenshotSection: React.FC<ScreenshotSectionProps> = ({
                     </div>
                 )}
             </Card>
-            <ClickHistoryList history={clickHistory} onHistoryItemClick={onHistoryItemClick} />
         </div>
     );
 };

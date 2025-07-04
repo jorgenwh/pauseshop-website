@@ -8,6 +8,7 @@ import { AppHeader } from '../components/ui';
 import { ScreenshotSection, ProductDisplaySection, ProductCarouselSection } from '../components/sections';
 import { ExtensionClickHistoryEntry } from '../lib/types';
 import { updateExtensionClickHistory } from '../lib/browser-extensions';
+import { ANIMATION_DURATIONS } from '../lib/constants/ui';
 import {
     useExtensionData,
     useDeepSearch,
@@ -63,7 +64,7 @@ const ReferrerPage = () => {
     } = useButtonDimensions(isRanking, rankingResults.length);
 
     useEffect(() => {
-        const timer = setTimeout(() => setAnimateIn(true), 100);
+        const timer = setTimeout(() => setAnimateIn(true), ANIMATION_DURATIONS.FADE_IN_DELAY);
         return () => clearTimeout(timer);
     }, []);
 

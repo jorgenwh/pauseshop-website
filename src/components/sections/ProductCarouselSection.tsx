@@ -2,6 +2,8 @@ import React from 'react';
 import { ProductCarousel } from '../../features/product-display';
 import { Button } from '../ui';
 import { AmazonProduct, RankingResult } from '../../lib/types';
+import { getDeepSearchButtonState } from '../../lib/utils';
+import { LAYOUT_DIMENSIONS } from '../../lib/constants/ui';
 
 interface ProductCarouselSectionProps {
     amazonProducts: AmazonProduct[];
@@ -42,58 +44,12 @@ const ProductCarouselSection: React.FC<ProductCarouselSectionProps> = ({
 }) => {
     if (amazonProducts.length === 0) return null;
 
-    // Determine deep search button state
-    const getDeepSearchButtonState = () => {
-        // No image available mode: no image and no saved ranked history
-        if (!canPerformDeepSearch && !hasSavedDeepSearchData) {
-            return {
-                variant: 'secondary' as const,
-                disabled: true,
-                loading: false,
-                text: 'No Image Available'
-            };
-        }
-        
-        // Loading state when ranking is in progress
-        if (isRanking) {
-            return {
-                variant: 'glow-grayscale' as const,
-                disabled: true,
-                loading: false,
-                text: 'Deep Search'
-            };
-        }
-        
-        // Results available mode: ranked results exist (from current session or saved history)
-        if (rankedProductsLength > 0 || hasSavedDeepSearchData) {
-            return {
-                variant: 'glow' as const,
-                disabled: false,
-                loading: false,
-                text: 'Deep Search'
-            };
-        }
-        
-        // Deep search available mode: has image but no saved ranked data
-        if (canPerformDeepSearch && !hasSavedDeepSearchData) {
-            return {
-                variant: 'secondary' as const,
-                disabled: false,
-                loading: false,
-                text: 'Deep Search'
-            };
-        }
-        
-        // Fallback (should not reach here normally)
-        return {
-            variant: 'secondary' as const,
-            disabled: false,
-            loading: false,
-            text: 'Deep Search'
-        };
-    };
-
-    const buttonState = getDeepSearchButtonState();
+    const buttonState = getDeepSearchButtonState(
+        canPerformDeepSearch,
+        hasSavedDeepSearchData,
+        isRanking,
+        rankedProductsLength
+    );
 
     return (
         <div className="lg:col-span-1 relative">
@@ -122,11 +78,11 @@ const ProductCarouselSection: React.FC<ProductCarouselSectionProps> = ({
                         className="absolute -bottom-3 h-1 bg-gray-300 rounded-full transition-all duration-500 ease-out"
                         style={{
                             left: !showDeepSearchView
-                                ? buttonDimensions.originalWidth * 0.1 // 10% offset to center 80% width bar
-                                : buttonDimensions.deepSearchLeft + buttonDimensions.deepSearchWidth * 0.1,
+                                ? buttonDimensions.originalWidth * LAYOUT_DIMENSIONS.BUTTON_BAR_OFFSET_RATIO
+                                : buttonDimensions.deepSearchLeft + buttonDimensions.deepSearchWidth * LAYOUT_DIMENSIONS.BUTTON_BAR_OFFSET_RATIO,
                             width: !showDeepSearchView
-                                ? buttonDimensions.originalWidth * 0.8 // 80% of button width
-                                : buttonDimensions.deepSearchWidth * 0.8
+                                ? buttonDimensions.originalWidth * LAYOUT_DIMENSIONS.BUTTON_BAR_WIDTH_RATIO
+                                : buttonDimensions.deepSearchWidth * LAYOUT_DIMENSIONS.BUTTON_BAR_WIDTH_RATIO
                         }}
                     />
                 </div>

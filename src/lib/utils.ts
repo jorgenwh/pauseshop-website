@@ -304,3 +304,6 @@ export const imageUrlToBase64 = (url: string): Promise<string> => {
             });
     });
 };
+
+// Re-export deep search utilities
+export * from './utils/deepSearch';

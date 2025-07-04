@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { rankProductsStreaming } from '../lib/api';
 import { imageUrlToBase64 as urlToBase64 } from '../lib/utils';
 import { AmazonProduct, RankingResult, RankingRequest, Product, ExtensionClickHistoryEntry } from '../lib/types';
+import { DEEP_SEARCH } from '../lib/constants/ui';
 
 interface DeepSearchState {
     isRanking: boolean;
@@ -189,9 +190,9 @@ export const useDeepSearch = (
                 rankingError: error instanceof Error ? error.message : "An unknown error occurred."
             }));
         } finally {
-            // Calculate remaining time to reach 5 seconds
+            // Calculate remaining time to reach minimum delay
             const elapsedTime = Date.now() - startTime;
-            const remainingTime = Math.max(0, 5000 - elapsedTime);
+            const remainingTime = Math.max(0, DEEP_SEARCH.RANKING_DELAY_MS * 5 - elapsedTime);
 
             // Wait for the remaining time before showing results
             setTimeout(() => {
@@ -215,7 +216,7 @@ export const useDeepSearch = (
         .sort((a, b) => a.rank - b.rank);
 
     // Check if deep search can be performed (needs product, amazon products, and image)
-    const canPerformDeepSearch = !!(product && amazonProducts.length > 0 && imageUrl);
+    const canPerformDeepSearch = !!(product && amazonProducts.length >= DEEP_SEARCH.MIN_PRODUCTS_FOR_RANKING && imageUrl);
 
     // Automatically trigger deep search ONCE when decoded data is available on initial page load
     // Only auto-execute AFTER the saved data check is complete and no saved data was found

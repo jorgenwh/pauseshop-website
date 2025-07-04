@@ -172,7 +172,7 @@ const ProductCarousel = ({ products, currentIndex, onProductSelect }: ProductCar
                 <div className="py-12">
                     {products.map((product, index) => (
                         <div
-                            key={product.imageId}
+                            key={product.id}
                             ref={el => {
                                 itemRefs.current[index] = el;
                             }}

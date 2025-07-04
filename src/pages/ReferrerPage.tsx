@@ -3,325 +3,240 @@
  * Displays the pause screenshot and product results without filtering
  */
 
-import { useEffect, useState, useCallback, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { ImagePreview } from '../features/image-upload';
-import { ProductDisplay, ProductCarousel } from '../features/product-display';
-import { AppHeader, Card, Button } from '../components/ui';
-import AmazonAssociateDisclaimer from '../components/ui/AmazonAssociateDisclaimer';
-import { TEXT, CAROUSEL_CONFIG } from '../lib/constants';
-import { getScreenshot, rankProductsStreaming } from '../lib/api';
-import { imageUrlToBase64 as urlToBase64 } from '../lib/utils';
-import { decodeReferrerData } from '../lib/referrer';
-import { DecodedUrlData, AmazonProduct, RankingResult, RankingRequest } from '../lib/types';
+import { useEffect, useState } from 'react';
+import { AppHeader } from '../components/ui';
+import { ScreenshotSection, ProductDisplaySection, ProductCarouselSection } from '../components/sections';
+import { ExtensionClickHistoryEntry } from '../lib/types';
+import { updateExtensionClickHistory } from '../lib/browser-extensions';
+import { ANIMATION_DURATIONS } from '../lib/constants/ui';
+import {
+    useExtensionData,
+    useDeepSearch,
+    useButtonDimensions,
+    useProductSelection
+} from '../hooks';
 
-interface ReferrerPageProps {
-    onReset: () => void;
-}
-
-const ReferrerPage = (_props: ReferrerPageProps) => {
-    const [searchParams] = useSearchParams();
-    const [imageUrl, setImageUrl] = useState<string | null>(null);
+const ReferrerPage = () => {
     const [animateIn, setAnimateIn] = useState(false);
-    const [loadingDots, setLoadingDots] = useState('.');
-    const [decodedData, setDecodedData] = useState<DecodedUrlData | null>(null);
-    const [selectedProductIndex, setSelectedProductIndex] = useState(0);
-    const [isRanking, setIsRanking] = useState(false);
-    const [rankingResults, setRankingResults] = useState<RankingResult[]>([]);
-    const [rankingError, setRankingError] = useState<string | null>(null);
-    const [showDeepSearchView, setShowDeepSearchView] = useState(false);
-    const [screenshotError, setScreenshotError] = useState<string | null>(null);
-    const [deepSearchAttempted, setDeepSearchAttempted] = useState(false);
-    const [deepSearchResultsReady, setDeepSearchResultsReady] = useState(false);
+    const [shouldAutoSwitchToDeepSearch, setShouldAutoSwitchToDeepSearch] = useState(false);
+    const [processedDeepSearchSessions, setProcessedDeepSearchSessions] = useState<Set<string>>(new Set());
 
-    // Refs for button positioning
-    const originalItemsButtonRef = useRef<HTMLButtonElement>(null);
-    const deepSearchButtonRef = useRef<HTMLButtonElement>(null);
-    const [buttonDimensions, setButtonDimensions] = useState({
-        originalWidth: 112,
-        deepSearchWidth: 96,
-        deepSearchLeft: 128
-    });
+    // Use custom hooks for data management
+    const {
+        imageUrl,
+        product,
+        amazonProducts,
+        clickHistory,
+        selectedProductIndex: extensionSelectedIndex,
+        screenshotError,
+        pauseId,
+        updateHistoryItem,
+        setScreenshotError,
+    } = useExtensionData();
 
-    const pauseId = searchParams.get('pauseId');
+    const {
+        isRanking,
+        rankingResults,
+        rankingError,
+        rankedProducts,
+        resetDeepSearch,
+        canPerformDeepSearch,
+        handleDeepSearch,
+        hasSavedDeepSearchData,
+        freshDeepSearchCompleted,
+    } = useDeepSearch(product, amazonProducts, imageUrl, pauseId, setScreenshotError, clickHistory);
+
+    const {
+        selectedProductIndex,
+        showDeepSearchView,
+        carouselProducts,
+        handleProductSelect,
+        handleOriginalItemsClick,
+        handleDeepSearchClick,
+        resetViewOnly,
+        setSelectedProductIndex,
+    } = useProductSelection(amazonProducts, rankedProducts, isRanking, hasSavedDeepSearchData);
+
+    const {
+        originalItemsButtonRef,
+        deepSearchButtonRef,
+        buttonDimensions,
+    } = useButtonDimensions(isRanking, rankingResults.length);
 
     useEffect(() => {
-        const data = searchParams.get('data');
-
-        if (pauseId) {
-            getScreenshot(pauseId).then(screenshotUrl => {
-                if (screenshotUrl) {
-                    setImageUrl(screenshotUrl);
-                }
-            });
-        }
-
-        if (data) {
-            const decoded = decodeReferrerData(data);
-            if (decoded) {
-                setDecodedData(decoded);
-                setSelectedProductIndex(decoded.clickedPosition);
-            }
-        }
-    }, [searchParams, pauseId]);
-
-    useEffect(() => {
-        const timer = setTimeout(() => setAnimateIn(true), 100);
+        const timer = setTimeout(() => setAnimateIn(true), ANIMATION_DURATIONS.FADE_IN_DELAY);
         return () => clearTimeout(timer);
     }, []);
 
-    // Calculate button dimensions for light bar positioning
+    // Sync selected index when extension data changes
     useEffect(() => {
-        const updateButtonDimensions = () => {
-            if (originalItemsButtonRef.current && deepSearchButtonRef.current) {
-                const originalRect = originalItemsButtonRef.current.getBoundingClientRect();
-                const deepSearchRect = deepSearchButtonRef.current.getBoundingClientRect();
-                const containerRect = originalItemsButtonRef.current.parentElement?.getBoundingClientRect();
+        setSelectedProductIndex(extensionSelectedIndex);
+    }, [extensionSelectedIndex, setSelectedProductIndex]);
 
-                if (containerRect) {
-                    setButtonDimensions({
-                        originalWidth: originalRect.width,
-                        deepSearchWidth: deepSearchRect.width,
-                        deepSearchLeft: deepSearchRect.left - containerRect.left
-                    });
-                }
-            }
-        };
-
-        // Update dimensions after component mounts and when text changes
-        const timer = setTimeout(updateButtonDimensions, 100);
-        return () => clearTimeout(timer);
-    }, [isRanking, rankingResults.length]); // Re-calculate when button text might change
-
-    const handleDeepSearch = useCallback(async () => {
-        if (!decodedData || !decodedData.product) return;
-
-        setIsRanking(true);
-        setRankingResults([]);
-        setRankingError(null);
-        setScreenshotError(null);
-        setDeepSearchAttempted(true);
-        setDeepSearchResultsReady(false);
-
-        const startTime = Date.now();
-
-        const { product, amazonProducts } = decodedData;
-
-        const callRankApi = async (request: RankingRequest) => {
-            return new Promise<void>((resolve, reject) => {
-                rankProductsStreaming(
-                    request,
-                    {
-                        onRanking: (result) => {
-                            setRankingResults(prev => [...prev, result].sort((a, b) => a.rank - b.rank));
-                        },
-                        onComplete: () => resolve(),
-                        onError: (error) => reject(error),
-                    }
-                );
-            });
-        };
-
-        try {
-            const thumbnailPromises = amazonProducts.map(async (p: AmazonProduct) => ({
-                id: p.imageId,
-                image: await urlToBase64(p.thumbnailUrl),
-            }));
-            const thumbnails = await Promise.all(thumbnailPromises);
-
-            // --- Attempt 1: Session-first ---
-            const initialRequest: RankingRequest = {
-                productName: product.name,
-                category: product.category,
-                pauseId: pauseId ?? undefined,
-                thumbnails,
-            };
-
-            try {
-                await callRankApi(initialRequest);
-            } catch (error) {
-                if (error instanceof Error && error.message.startsWith('SESSION_IMAGE_UNAVAILABLE')) {
-                    // --- Attempt 2: Fallback with original image ---
-                    if (imageUrl) {
-                        const originalImage = await urlToBase64(imageUrl);
-                        const fallbackRequest: RankingRequest = {
-                            productName: product.name,
-                            category: product.category,
-                            originalImage,
-                            thumbnails,
-                        };
-                        await callRankApi(fallbackRequest);
-                    } else {
-                        setScreenshotError("Saved screenshot has expired. Please pause the video again.");
-                        return;
-                    }
-                } else {
-                    throw error; // Re-throw other errors
-                }
-            }
-        } catch (error) {
-            console.error("Deep Search failed:", error);
-            setRankingError(error instanceof Error ? error.message : "An unknown error occurred.");
-        } finally {
-            // Calculate remaining time to reach 5 seconds
-            const elapsedTime = Date.now() - startTime;
-            const remainingTime = Math.max(0, 5000 - elapsedTime);
-
-            // Wait for the remaining time before showing results
-            setTimeout(() => {
-                setIsRanking(false);
-                setDeepSearchResultsReady(true);
-            }, remainingTime);
-        }
-    }, [decodedData, imageUrl, pauseId]);
-
+    // Auto-switch to deep search view after manual execution
     useEffect(() => {
-        if (!imageUrl) {
-            const interval = setInterval(() => {
-                setLoadingDots(prev => (prev === '...' ? '.' : prev + '.'));
-            }, 500);
-            return () => clearInterval(interval);
+        if (shouldAutoSwitchToDeepSearch && rankedProducts.length > 0) {
+            handleDeepSearchClick();
+            setShouldAutoSwitchToDeepSearch(false);
         }
-    }, [imageUrl]);
+    }, [shouldAutoSwitchToDeepSearch, rankedProducts.length, handleDeepSearchClick]);
 
-    // Automatically trigger deep search when decoded data is available
+    // Update click history with deep search results when ranking completes
     useEffect(() => {
-        if (decodedData?.product && !isRanking && rankingResults.length === 0 && !deepSearchAttempted) {
-            handleDeepSearch();
-        }
-    }, [decodedData, handleDeepSearch, isRanking, rankingResults.length, deepSearchAttempted]);
-
-    // Create ranked products array from ranking results
-    const rankedProducts = rankingResults
-        .map((ranking: RankingResult) => {
-            const product = decodedData?.amazonProducts.find((p: AmazonProduct) => p.id === ranking.id);
-            return product ? { ...product, ...ranking } : null;
-        })
-        .filter((p): p is (AmazonProduct & RankingResult) => p !== null)
-        .sort((a, b) => a.rank - b.rank);
-
-    const handleProductSelect = (product: AmazonProduct, index: number) => {
-        // If we're in deep search view and the product is clicked from RankingResults,
-        // we need to find its index in the ranked products array
-        if (showDeepSearchView && rankedProducts.some(p => p.id === product.id)) {
-            const rankedIndex = rankedProducts.findIndex(p => p.id === product.id);
-            if (rankedIndex !== -1) {
-                setSelectedProductIndex(rankedIndex);
+        const updateClickHistoryWithDeepSearch = async () => {
+            // Only proceed if deep search was freshly completed (not loaded from saved data) and we have results
+            if (!freshDeepSearchCompleted || rankedProducts.length === 0 || !pauseId || !product) {
                 return;
             }
-        }
 
-        // For original view or direct carousel clicks, use the provided index
-        setSelectedProductIndex(index);
+            // Find the current product group in click history (match by pauseId AND product name)
+            const currentSession = clickHistory.find(entry =>
+                entry.pauseId === pauseId &&
+                entry.productGroup.product.name === product.name
+            );
+
+            if (!currentSession) {
+                console.warn('Current product group not found in click history, cannot update with deep search data');
+                return;
+            }
+
+            // Check if this specific product group already has deep search data
+            if (currentSession.hasDeepSearch) {
+                console.log('[DeepSearch] This product group already has deep search data, skipping');
+                return;
+            }
+
+            // Create a unique identifier for this product group (pauseId + product name)
+            const productGroupId = `${pauseId}-${product.name}`;
+
+            // Check if we've already processed this specific product group's deep search in this session
+            if (processedDeepSearchSessions.has(productGroupId)) {
+                return;
+            }
+
+            console.log(`[DeepSearch] Deep search completed! Updating click history with ${rankedProducts.length} ranked products for session ${pauseId} (product: ${product.name})`);
+            console.log('[DeepSearch] Ranked products details:', rankedProducts);
+            console.log('[DeepSearch] Products being ranked:', amazonProducts.length, 'products');
+
+            // Mark this product group as processed
+            setProcessedDeepSearchSessions(prev => new Set(prev).add(productGroupId));
+
+            // Find the current product group in click history
+            const updatedHistory = [...clickHistory];
+            const currentSessionIndex = updatedHistory.findIndex(entry =>
+                entry.pauseId === pauseId &&
+                entry.productGroup.product.name === product.name
+            );
+
+            if (currentSessionIndex === -1) {
+                console.warn('Current product group not found in click history, cannot update with deep search data');
+                return;
+            }
+
+            // Update the session entry with deep search metadata
+            const updatedSession = {
+                ...currentSession,
+                hasDeepSearch: true,
+                deepSearchTimestamp: Date.now(),
+                productGroup: {
+                    ...currentSession.productGroup,
+                    scrapedProducts: currentSession.productGroup.scrapedProducts.map(scrapedProduct => {
+                        // Find the ranking data for this product by position
+                        // Note: rankedProducts have position-based matching, scrapedProducts have id-based matching
+                        const rankingData = rankedProducts.find(rankedProduct =>
+                            rankedProduct.position === scrapedProduct.position
+                        );
+
+                        if (rankingData) {
+                            console.log(`[DeepSearch] ✅ Adding ranking data to product ${scrapedProduct.id} (position ${scrapedProduct.position}): rank ${rankingData.rank}, similarity ${rankingData.similarityScore}`);
+                            return {
+                                ...scrapedProduct,
+                                rank: rankingData.rank,
+                                similarityScore: rankingData.similarityScore,
+                            };
+                        } else {
+                            // console.log(`[DeepSearch] ❌ No ranking data found for product ${scrapedProduct.id} (position ${scrapedProduct.position})`);
+                        }
+
+                        return scrapedProduct;
+                    }),
+                },
+            };
+
+            updatedHistory[currentSessionIndex] = updatedSession;
+
+            // Send the updated history back to the extension
+            console.log('[DeepSearch] Sending updated click history to extension...');
+            const success = await updateExtensionClickHistory(updatedHistory);
+
+            if (success) {
+                console.log('Successfully updated extension click history with deep search results');
+                // Note: We don't update local state here to avoid triggering the useDeepSearch effect again
+                // The extension should be the source of truth for click history data
+            } else {
+                console.warn('Failed to update extension click history with deep search results');
+            }
+        };
+
+        updateClickHistoryWithDeepSearch();
+    }, [freshDeepSearchCompleted, rankedProducts, pauseId, product, amazonProducts.length, clickHistory, processedDeepSearchSessions]);
+
+    const handleHistoryItemClick = async (item: ExtensionClickHistoryEntry) => {
+        await updateHistoryItem(item);
+
+        // Reset deep search view and auto-switch flag, then scroll to top
+        // Note: Don't reset the selectedProductIndex as it should be preserved from the history item
+        resetViewOnly();
+        resetDeepSearch();
+        setShouldAutoSwitchToDeepSearch(false);
+        window.scrollTo(0, 0);
     };
 
-    // Determine which products to show in carousel
-    const carouselProducts = showDeepSearchView ? rankedProducts : (decodedData?.amazonProducts.slice(0, CAROUSEL_CONFIG.itemLimit) || []);
-
-    const handleOriginalItemsClick = () => {
-        setShowDeepSearchView(false);
-        setSelectedProductIndex(0);
-    };
-
-    const handleDeepSearchClick = () => {
+    const handleDeepSearchButtonClick = async () => {
         if (rankedProducts.length > 0) {
-            setShowDeepSearchView(true);
-            setSelectedProductIndex(0);
+            // If results already exist, just switch to deep search view
+            handleDeepSearchClick();
+        } else if (canPerformDeepSearch) {
+            // If no results but deep search is possible, execute it and set flag to auto-switch
+            setShouldAutoSwitchToDeepSearch(true);
+            await handleDeepSearch();
         }
     };
 
     return (
         <div className={`container mx-auto px-4 py-8 max-w-7xl transition-opacity duration-500 ${animateIn ? 'opacity-100' : 'opacity-0'}`}>
-            <AppHeader subtitle={TEXT.resultsDescription} className="mb-8" showBrowserExtensionButton={false} />
+            <AppHeader className="mb-8" showBrowserExtensionButton={false} />
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                {/* Screenshot Section */}
-                <div className="lg:col-span-1">
-                    <Card className="sticky top-4">
-                        <h2 className="text-xl font-semibold mb-4 text-white">Pause Screenshot</h2>
-                        {screenshotError ? (
-                            <div className="max-h-[400px] overflow-hidden flex items-center justify-center rounded-lg shadow-md bg-gray-700 min-h-[200px]">
-                                <div className="text-center">
-                                    <div className="text-lg font-semibold" style={{ color: '#ff4444' }}>{screenshotError}</div>
-                                </div>
-                            </div>
-                        ) : imageUrl ? (
-                            <ImagePreview imageUrl={imageUrl} />
-                        ) : (
-                            <div className="max-h-[400px] overflow-hidden flex items-center justify-center rounded-lg shadow-md bg-gray-700 min-h-[200px]">
-                                <div className="text-center">
-                                    <div className="text-xl text-white font-semibold">Loading{loadingDots}</div>
-                                </div>
-                            </div>
-                        )}
-                    </Card>
-                </div>
+                <ScreenshotSection
+                    imageUrl={imageUrl}
+                    screenshotError={screenshotError}
+                />
 
-                {/* Product Display Section */}
-                <div className="lg:col-span-2">
-                    {decodedData && (
-                        <div>
-                            <ProductDisplay
-                                product={decodedData.product}
-                                amazonProduct={carouselProducts[selectedProductIndex]}
-                            />
-                           <AmazonAssociateDisclaimer />
-                           {rankingError && (
-                               <div className="text-red-500 text-center mt-6">{rankingError}</div>
-                           )}
-                       </div>
-                   )}
-               </div>
+                <ProductDisplaySection
+                    product={product}
+                    selectedProduct={carouselProducts[selectedProductIndex]}
+                    rankingError={rankingError}
+                    clickHistory={clickHistory}
+                    onHistoryItemClick={handleHistoryItemClick}
+                />
 
-                {/* Product Carousel Section */}
-                <div className="lg:col-span-1 relative">
-                    {decodedData && (
-                        <>
-                            <div className="absolute w-full flex justify-center -top-16 z-10">
-                                <div className="relative flex space-x-4">
-                                    <Button
-                                        ref={originalItemsButtonRef}
-                                        variant="secondary"
-                                        onClick={handleOriginalItemsClick}
-                                        className="relative"
-                                    >
-                                        Original Items
-                                    </Button>
-                                    <Button
-                                        ref={deepSearchButtonRef}
-                                        variant={isRanking || rankedProducts.length > 0 ? 'glow' : 'secondary'}
-                                        onClick={handleDeepSearchClick}
-                                        disabled={!deepSearchResultsReady || rankedProducts.length === 0}
-                                        loading={isRanking}
-                                        className="relative"
-                                    >
-                                        Deep Search
-                                    </Button>
-                                    {/* Animated light bar */}
-                                    <div
-                                        className="absolute -bottom-3 h-1 bg-gray-300 rounded-full transition-all duration-500 ease-out"
-                                        style={{
-                                            left: !showDeepSearchView
-                                                ? buttonDimensions.originalWidth * 0.1 // 10% offset to center 80% width bar
-                                                : buttonDimensions.deepSearchLeft + buttonDimensions.deepSearchWidth * 0.1,
-                                            width: !showDeepSearchView
-                                                ? buttonDimensions.originalWidth * 0.8 // 80% of button width
-                                                : buttonDimensions.deepSearchWidth * 0.8
-                                        }}
-                                    />
-                                </div>
-                            </div>
-                            <div className="sticky top-4">
-                                <ProductCarousel
-                                    key={showDeepSearchView ? 'deep-search' : 'original'}
-                                    products={carouselProducts}
-                                    currentIndex={selectedProductIndex}
-                                    onProductSelect={handleProductSelect}
-                                />
-                            </div>
-                        </>
-                    )}
-                </div>
+                <ProductCarouselSection
+                    amazonProducts={amazonProducts}
+                    carouselProducts={carouselProducts}
+                    selectedProductIndex={selectedProductIndex}
+                    onProductSelect={handleProductSelect}
+                    showDeepSearchView={showDeepSearchView}
+                    onOriginalItemsClick={handleOriginalItemsClick}
+                    onDeepSearchClick={handleDeepSearchButtonClick}
+                    isRanking={isRanking}
+                    rankedProductsLength={rankedProducts.length}
+                    canPerformDeepSearch={canPerformDeepSearch}
+                    hasSavedDeepSearchData={hasSavedDeepSearchData}
+                    originalItemsButtonRef={originalItemsButtonRef}
+                    deepSearchButtonRef={deepSearchButtonRef}
+                    buttonDimensions={buttonDimensions}
+                />
             </div>
         </div>
     );

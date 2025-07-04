@@ -78,9 +78,8 @@ const ResultsPage = ({ imageUrl, products, onReset }: ResultsPageProps) => {
                 canonical="/results"
                 robots="index, follow"
             />
-            <AppHeader subtitle={TEXT.resultsDescription} className="mb-8" />
+            <AppHeader className="mb-8" />
 
-            {/* Product Filters */}
             <ProductFilters
                 products={products}
                 selectedCategories={selectedCategories}

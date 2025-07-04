@@ -47,9 +47,7 @@ const App = () => {
                         <Route
                             path="/referrer"
                             element={
-                                <ReferrerPage
-                                    onReset={reset}
-                                />
+                                <ReferrerPage />
                             }
                         />
                         <Route path="*" element={<Navigate to="/" replace />} />

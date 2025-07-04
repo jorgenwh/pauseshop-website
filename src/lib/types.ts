@@ -51,21 +51,58 @@ export interface Product {
  */
 export interface AmazonProduct {
     id: string;
-    imageId: string;
     amazonAsin?: string;
     price?: number;
     thumbnailUrl: string;
-    productUrl: string | null;
+    productUrl?: string | null;
+    position: number;
+    // Deep search ranking data (only present if deep search was performed)
+    rank?: number;              // 1-N position from deep search
+    similarityScore?: number;   // 0-1 similarity score from deep search
+}
+
+// --- Types for Browser Extension Communication ---
+
+/**
+ * Represents a group of products associated with a single identified item, as defined in the extension.
+ */
+export interface ExtensionProductGroup {
+    product: Product;
+    scrapedProducts: AmazonProduct[];
 }
 
 /**
- * Represents the fully decoded data from the referrer URL.
+ * Represents the stored product data for a given pause session, as defined in the extension.
  */
-export interface DecodedUrlData {
-    product?: Product;
-    clickedAmazonProduct: AmazonProduct;
-    clickedPosition: number;
-    amazonProducts: AmazonProduct[];
+export interface ExtensionProductStorage {
+    pauseId: string;
+    productGroups: ExtensionProductGroup[];
+}
+
+/**
+ * Represents a single entry in the click history, as defined in the extension.
+ */
+export interface ExtensionClickHistoryEntry {
+    pauseId: string;
+    clickedProduct: AmazonProduct;
+    productGroup: ExtensionProductGroup;
+    // Deep search metadata
+    hasDeepSearch?: boolean;    // Whether deep search was performed for this session
+    deepSearchTimestamp?: number; // When deep search was completed (Unix timestamp)
+}
+
+/**
+ * Represents the click history data retrieved from the extension's storage.
+ */
+export type ExtensionClickHistoryStorage = ExtensionClickHistoryEntry[];
+
+/**
+ * Represents the data structure retrieved from the extension's storage.
+ */
+export interface ExtensionData {
+    clickedProduct: AmazonProduct | null;
+    productStorage: ExtensionProductStorage | null;
+    clickHistory: ExtensionClickHistoryStorage | null;
 }
 
 

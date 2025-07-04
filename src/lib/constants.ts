@@ -17,7 +17,6 @@ export const COLORS = {
     // Text colors
     textLight: 'text-white',
     textMuted: 'text-gray-400',
-    clickedItem: 'Clicked Item',
     textSubtle: 'text-gray-300',
 
     // UI element colors
@@ -64,7 +63,6 @@ export const TEXT = {
     productsFoundText: (count: number) => `${count} product${count !== 1 ? 's' : ''} found`,
     amazonLinkText: 'Find on Amazon',
     unknownBrand: 'Unknown brand',
-    accuracyLabel: 'Accuracy',
     // Results page text
     resultsDescription: 'Here are the products we found in your image. Click on any product to find it on Amazon.',
     uploadedImage: 'Uploaded Image',
@@ -72,6 +70,7 @@ export const TEXT = {
     noProductsFound: 'No products were found in this image.',
     tryAnotherImage: 'Try Another Image',
     productsFoundSummary: (count: number) => `${count === 1 ? 'product' : 'products'} found in your image`,
+    screenshotExpired: 'Saved screenshot has expired.',
 };
 
 // Tips content

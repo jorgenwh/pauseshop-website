@@ -11,8 +11,6 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({ product }: ProductCardProps) => {
-    const confidencePercentage = Math.round(product.confidence * 10);
-    
     // Format category name for display
     const formatCategoryName = (category: string) => {
         return category.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
@@ -27,16 +25,6 @@ const ProductCard = ({ product }: ProductCardProps) => {
                         {(product.brand && product.brand.toLowerCase() !== 'unknown') ? `${product.brand} • ` : ''}{formatCategoryName(product.category)}
                     </p>
                 </div>
-                <Badge 
-                    variant={confidencePercentage >= 90 ? 'success' : 'warning'}
-                    className="flex items-center gap-2 min-w-[100px] justify-center"
-                >
-                    <Icon name="check" size={16} />
-                    <div className="text-center">
-                        <div className="text-xs font-medium opacity-75">{TEXT.accuracyLabel}</div>
-                        <div className="text-sm font-bold">{confidencePercentage}%</div>
-                    </div>
-                </Badge>
             </div>
 
             <div className="mt-3 flex flex-wrap gap-2">

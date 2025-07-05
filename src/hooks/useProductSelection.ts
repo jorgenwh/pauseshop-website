@@ -29,8 +29,8 @@ export const useProductSelection = (
         if (hasSavedDeepSearchData || rankedProducts.length === 0) {
             // Always start with original items view when clicking different history items
             setShowDeepSearchView(false);
-            // Note: Don't reset selectedProductIndex here as it should be preserved 
-            // from the history item's clicked product index
+            // Reset to first item when switching between different product groups
+            setSelectedProductIndex(0);
         }
     }, [hasSavedDeepSearchData, rankedProducts.length]);
 

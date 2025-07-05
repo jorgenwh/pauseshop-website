@@ -24,7 +24,7 @@ const ProductCarousel = ({ products, currentIndex, onProductSelect }: ProductCar
         const containerRect = container.getBoundingClientRect();
         const containerCenter = containerRect.top + containerRect.height / 2;
         const newStyles: { [key: number]: React.CSSProperties } = {};
-
+        
         itemRefs.current.forEach((item, index) => {
             if (!item) return;
 
@@ -33,12 +33,9 @@ const ProductCarousel = ({ products, currentIndex, onProductSelect }: ProductCar
             const distanceFromCenter = itemCenter - containerCenter;
             const absoluteDistance = Math.abs(distanceFromCenter);
             
-            // Calculate opacity and scale based on distance
+            // Calculate scale based on distance
             const maxDistance = containerRect.height / 2;
             const normalizedDistance = Math.min(absoluteDistance / maxDistance, 1);
-            
-            // Smooth easing function for opacity
-            const opacity = 1 - Math.pow(normalizedDistance, 2) * 0.8;
             
             // Subtle scale effect for depth
             const scale = index === currentIndex ? 1.1 : (1 - normalizedDistance * 0.05);
@@ -47,7 +44,6 @@ const ProductCarousel = ({ products, currentIndex, onProductSelect }: ProductCar
             const blur = normalizedDistance > 0.7 ? 2 : 0;
             
             newStyles[index] = {
-                opacity,
                 transform: `scale(${scale})`,
                 filter: blur > 0 ? `blur(${blur}px)` : 'none',
                 transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), filter 0.3s ease-out',
@@ -55,7 +51,7 @@ const ProductCarousel = ({ products, currentIndex, onProductSelect }: ProductCar
         });
 
         setItemStyles(newStyles);
-    }, [currentIndex]);
+    }, [currentIndex, products.length]);
 
     useEffect(() => {
         const container = scrollContainerRef.current;
@@ -76,8 +72,16 @@ const ProductCarousel = ({ products, currentIndex, onProductSelect }: ProductCar
         updateItemStyles();
 
         container.addEventListener('scroll', handleScroll, { passive: true });
+        
+        // Also update when window resizes
+        const handleResize = () => {
+            updateItemStyles();
+        };
+        window.addEventListener('resize', handleResize);
+        
         return () => {
             container.removeEventListener('scroll', handleScroll);
+            window.removeEventListener('resize', handleResize);
             if (updateAnimationRef.current) {
                 cancelAnimationFrame(updateAnimationRef.current);
             }
@@ -96,11 +100,15 @@ const ProductCarousel = ({ products, currentIndex, onProductSelect }: ProductCar
             const diff = targetScroll - current;
             
             // Apply a very small portion of the difference for ultra-smooth animation
-            if (Math.abs(diff) > 0.01) {
+            if (Math.abs(diff) > 0.5) {
                 container.scrollTop = current + diff * 0.08; // Much smaller steps
+                updateItemStyles(); // Update styles during animation
                 animationId = requestAnimationFrame(animate);
             } else {
+                // Snap to exact target when close enough
+                container.scrollTop = targetScroll;
                 animationId = 0;
+                updateItemStyles(); // Final update when animation ends
             }
         };
 
@@ -131,7 +139,7 @@ const ProductCarousel = ({ products, currentIndex, onProductSelect }: ProductCar
                 cancelAnimationFrame(animationId);
             }
         };
-    }, []);
+    }, [updateItemStyles]);
 
     useEffect(() => {
         const container = scrollContainerRef.current;
@@ -157,8 +165,8 @@ const ProductCarousel = ({ products, currentIndex, onProductSelect }: ProductCar
 
     return (
         <div className="relative h-[580px] overflow-hidden rounded-lg bg-gray-900">
-            <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-gray-900 via-gray-900/80 to-transparent z-10 pointer-events-none" />
-            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-gray-900 via-gray-900/80 to-transparent z-10 pointer-events-none" />
+            <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-gray-900 via-gray-900/80 to-transparent z-20 pointer-events-none" />
+            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-gray-900 via-gray-900/80 to-transparent z-20 pointer-events-none" />
             
             <div 
                 ref={scrollContainerRef}
@@ -169,7 +177,7 @@ const ProductCarousel = ({ products, currentIndex, onProductSelect }: ProductCar
                     scrollBehavior: 'auto' // Disable native smooth scrolling
                 }}
             >
-                <div className="py-12">
+                <div style={{ paddingTop: '100px', paddingBottom: '80px' }}>
                     {products.map((product, index) => (
                         <div
                             key={product.id}

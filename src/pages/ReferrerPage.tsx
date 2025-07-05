@@ -27,7 +27,6 @@ const ReferrerPage = () => {
         product,
         amazonProducts,
         clickHistory,
-        selectedProductIndex: extensionSelectedIndex,
         screenshotError,
         pauseId,
         updateHistoryItem,
@@ -54,7 +53,6 @@ const ReferrerPage = () => {
         handleOriginalItemsClick,
         handleDeepSearchClick,
         resetViewOnly,
-        setSelectedProductIndex,
     } = useProductSelection(amazonProducts, rankedProducts, isRanking, hasSavedDeepSearchData);
 
     const {
@@ -68,10 +66,7 @@ const ReferrerPage = () => {
         return () => clearTimeout(timer);
     }, []);
 
-    // Sync selected index when extension data changes
-    useEffect(() => {
-        setSelectedProductIndex(extensionSelectedIndex);
-    }, [extensionSelectedIndex, setSelectedProductIndex]);
+    // Remove syncing selected index - we now reset to 0 when switching products
 
     // Auto-switch to deep search view after manual execution
     useEffect(() => {

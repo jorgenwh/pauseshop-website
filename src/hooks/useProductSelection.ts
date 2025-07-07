@@ -30,9 +30,12 @@ export const useProductSelection = (
         if (hasSavedDeepSearchData || rankedProducts.length === 0) {
             // Always start with original items view when clicking different history items
             setShowDeepSearchView(false);
-            // Use the initial selected index from extension data, or fall back to 0
-            console.log('[useProductSelection] Setting selectedProductIndex to:', initialSelectedIndex ?? 0);
-            setSelectedProductIndex(initialSelectedIndex ?? 0);
+            
+            // Use the initial selected index from extension data when it's available and valid
+            if (initialSelectedIndex !== undefined && initialSelectedIndex >= 0) {
+                console.log('[useProductSelection] Setting selectedProductIndex to:', initialSelectedIndex);
+                setSelectedProductIndex(initialSelectedIndex);
+            }
         }
     }, [hasSavedDeepSearchData, rankedProducts.length, initialSelectedIndex]);
 

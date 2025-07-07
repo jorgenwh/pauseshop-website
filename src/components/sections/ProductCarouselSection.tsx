@@ -89,7 +89,7 @@ const ProductCarouselSection: React.FC<ProductCarouselSectionProps> = ({
             </div>
             <div className="sticky top-4">
                 <ProductCarousel
-                    key={`${showDeepSearchView ? 'deep-search' : 'original'}-${amazonProducts[0]?.id || ''}`}
+                    key={`${showDeepSearchView ? 'deep-search' : 'original'}`}
                     products={carouselProducts}
                     currentIndex={selectedProductIndex}
                     onProductSelect={onProductSelect}

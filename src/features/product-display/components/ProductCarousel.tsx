@@ -19,14 +19,14 @@ const ProductCarousel = ({ products, currentIndex, onProductSelect }: ProductCar
     
     const updateItemStyles = useCallback(() => {
         const container = scrollContainerRef.current;
-        if (!container) return;
+        if (!container || !products.length) return;
 
         const containerRect = container.getBoundingClientRect();
         const containerCenter = containerRect.top + containerRect.height / 2;
         const newStyles: { [key: number]: React.CSSProperties } = {};
 
         itemRefs.current.forEach((item, index) => {
-            if (!item) return;
+            if (!item || index >= products.length) return;
 
             const rect = item.getBoundingClientRect();
             const itemCenter = rect.top + rect.height / 2;
@@ -55,7 +55,7 @@ const ProductCarousel = ({ products, currentIndex, onProductSelect }: ProductCar
         });
 
         setItemStyles(newStyles);
-    }, [currentIndex]);
+    }, [currentIndex, products.length]);
 
     useEffect(() => {
         const container = scrollContainerRef.current;
@@ -135,16 +135,16 @@ const ProductCarousel = ({ products, currentIndex, onProductSelect }: ProductCar
 
     useEffect(() => {
         const container = scrollContainerRef.current;
-        if (!container) return;
+        if (!container || !products.length) return;
 
         const selectedCard = itemRefs.current[currentIndex];
-        if (selectedCard) {
+        if (selectedCard && currentIndex >= 0 && currentIndex < products.length) {
             selectedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
         
         // Update styles after selection change
         setTimeout(updateItemStyles, 100);
-    }, [currentIndex, updateItemStyles]);
+    }, [currentIndex, updateItemStyles, products.length]);
 
     const getItemSpacing = (index: number) => {
         if (index === currentIndex - 1) {

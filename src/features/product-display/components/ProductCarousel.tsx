@@ -128,12 +128,14 @@ const ProductCarousel = ({ products, currentIndex, onProductSelect }: ProductCar
     }, [currentIndex, updateItemStyles, products.length]);
 
     const getItemSpacing = (index: number) => {
-        if (index === currentIndex - 1) {
-            return 'mb-8';
-        } else if (index === currentIndex) {
-            return 'mb-8';
+        // When a card scales to 1.1x, it grows by 10%. For a 180px card, that's 18px extra height.
+        // We need to add extra margin to compensate and maintain visual spacing
+        if (index === currentIndex) {
+            return 'mb-6'; // Extra spacing after the scaled card
+        } else if (index === currentIndex - 1) {
+            return 'mb-6'; // Extra spacing before the scaled card  
         }
-        return 'mb-3';
+        return 'mb-4'; // Normal spacing for other cards
     };
 
     return (

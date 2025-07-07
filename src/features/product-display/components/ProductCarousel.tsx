@@ -1,6 +1,6 @@
 /**
  * ProductCarousel component that displays a vertical scrollable list of product thumbnails
- * with clean card design and fade effects
+ * with clean card design
  */
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { AmazonProduct } from '../../../lib/types';
@@ -21,36 +21,17 @@ const ProductCarousel = ({ products, currentIndex, onProductSelect }: ProductCar
         const container = scrollContainerRef.current;
         if (!container || !products.length) return;
 
-        const containerRect = container.getBoundingClientRect();
-        const containerCenter = containerRect.top + containerRect.height / 2;
         const newStyles: { [key: number]: React.CSSProperties } = {};
 
         itemRefs.current.forEach((item, index) => {
             if (!item || index >= products.length) return;
 
-            const rect = item.getBoundingClientRect();
-            const itemCenter = rect.top + rect.height / 2;
-            const distanceFromCenter = itemCenter - containerCenter;
-            const absoluteDistance = Math.abs(distanceFromCenter);
-            
-            // Calculate opacity and scale based on distance
-            const maxDistance = containerRect.height / 2;
-            const normalizedDistance = Math.min(absoluteDistance / maxDistance, 1);
-            
-            // Smooth easing function for opacity
-            const opacity = 1 - Math.pow(normalizedDistance, 2) * 0.8;
-            
-            // Subtle scale effect for depth
-            const scale = index === currentIndex ? 1.1 : (1 - normalizedDistance * 0.05);
-            
-            // Blur effect for distant items
-            const blur = normalizedDistance > 0.7 ? 2 : 0;
+            // Scale effect for selected card only
+            const scale = index === currentIndex ? 1.1 : 1.0;
             
             newStyles[index] = {
-                opacity,
                 transform: `scale(${scale})`,
-                filter: blur > 0 ? `blur(${blur}px)` : 'none',
-                transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), filter 0.3s ease-out',
+                transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             };
         });
 
@@ -157,9 +138,6 @@ const ProductCarousel = ({ products, currentIndex, onProductSelect }: ProductCar
 
     return (
         <div className="relative h-[580px] overflow-hidden rounded-lg bg-gray-900">
-            <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-gray-900 via-gray-900/80 to-transparent z-10 pointer-events-none" />
-            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-gray-900 via-gray-900/80 to-transparent z-10 pointer-events-none" />
-            
             <div 
                 ref={scrollContainerRef}
                 className="h-full overflow-y-auto scrollbar-hide px-4"

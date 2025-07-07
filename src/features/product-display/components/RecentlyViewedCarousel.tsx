@@ -34,30 +34,15 @@ const RecentlyViewedCarousel = ({ history, onHistoryItemClick }: RecentlyViewedC
         const container = scrollContainerRef.current;
         if (!container) return;
 
-        const containerRect = container.getBoundingClientRect();
-        const containerCenter = containerRect.left + containerRect.width / 2;
         const newStyles: { [key: number]: React.CSSProperties } = {};
 
         itemRefs.current.forEach((item, index) => {
             if (!item) return;
 
-            const rect = item.getBoundingClientRect();
-            const itemCenter = rect.left + rect.width / 2;
-            const distanceFromCenter = itemCenter - containerCenter;
-            const absoluteDistance = Math.abs(distanceFromCenter);
-            
-            // Calculate opacity and scale based on distance (horizontal version)
-            const maxDistance = containerRect.width / 2;
-            const normalizedDistance = Math.min(absoluteDistance / maxDistance, 1);
-            
-            // Smooth easing function for opacity
-            const opacity = 1 - Math.pow(normalizedDistance, 2) * 0.8;
-            
-            // Subtle scale effect for depth
-            const scale = index === selectedIndex ? 1.1 : (1 - normalizedDistance * 0.05);
+            // Scale effect for selected card only
+            const scale = index === selectedIndex ? 1.1 : 1.0;
             
             newStyles[index] = {
-                opacity,
                 transform: `scale(${scale})`,
                 transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             };

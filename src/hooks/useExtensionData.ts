@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { getScreenshot } from '../lib/api';
 import { getExtensionData } from '../lib/browser-extensions';
 import { Product, AmazonProduct, ExtensionClickHistoryEntry } from '../lib/types';
-import { TEXT } from '../lib/constants';
+import { TEXT, CAROUSEL_CONFIG } from '../lib/constants';
 
 interface ExtensionDataState {
     imageUrl: string | null;
@@ -25,14 +25,18 @@ export const useExtensionData = () => {
         pauseId: null,
     });
 
+
+
     const updateHistoryItem = async (item: ExtensionClickHistoryEntry) => {
         // Set the new product and amazon products
         const newProduct = item.productGroup.product;
         const newAmazonProducts = item.productGroup.scrapedProducts;
 
-        // Find the index of the originally clicked product from the history entry
-        const clickedIndex = newAmazonProducts.findIndex(p => p.id === item.clickedProduct.id);
+        // Find the index of the originally clicked product within the carousel-limited products
+        const carouselLimitedProducts = newAmazonProducts.slice(0, CAROUSEL_CONFIG.itemLimit);
+        const clickedIndex = carouselLimitedProducts.findIndex(p => p.id === item.clickedProduct.id);
         const newSelectedIndex = clickedIndex !== -1 ? clickedIndex : 0;
+        console.log('[useExtensionData updateHistoryItem] Found clicked product index:', clickedIndex, 'for product:', item.clickedProduct.id);
 
         // Update the pauseId
         const newPauseId = item.pauseId;
@@ -125,7 +129,11 @@ export const useExtensionData = () => {
             if (activeGroup) {
                 const mainProduct = activeGroup.product;
                 const activeAmazonProducts = activeGroup.scrapedProducts;
-                const clickedIndex = activeAmazonProducts.findIndex(p => p.id === clickedProduct.id);
+                
+                // Find the index within the carousel-limited products
+                const carouselLimitedProducts = activeAmazonProducts.slice(0, CAROUSEL_CONFIG.itemLimit);
+                const clickedIndex = carouselLimitedProducts.findIndex(p => p.id === clickedProduct.id);
+                console.log('[useExtensionData] Found clicked product index:', clickedIndex, 'for product:', clickedProduct.id);
 
                 // Set state together
                 setState(prev => ({

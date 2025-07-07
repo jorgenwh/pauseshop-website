@@ -29,6 +29,7 @@ const ReferrerPage = () => {
         clickHistory,
         screenshotError,
         pauseId,
+        selectedProductIndex: extensionSelectedIndex,
         updateHistoryItem,
         setScreenshotError,
     } = useExtensionData();
@@ -53,7 +54,7 @@ const ReferrerPage = () => {
         handleOriginalItemsClick,
         handleDeepSearchClick,
         resetViewOnly,
-    } = useProductSelection(amazonProducts, rankedProducts, isRanking, hasSavedDeepSearchData);
+    } = useProductSelection(amazonProducts, rankedProducts, isRanking, hasSavedDeepSearchData, extensionSelectedIndex);
 
     const {
         originalItemsButtonRef,

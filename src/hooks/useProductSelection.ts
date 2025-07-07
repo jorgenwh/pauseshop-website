@@ -6,7 +6,8 @@ export const useProductSelection = (
     amazonProducts: AmazonProduct[], 
     rankedProducts: (AmazonProduct & RankingResult)[], 
     isRanking?: boolean,
-    hasSavedDeepSearchData?: boolean
+    hasSavedDeepSearchData?: boolean,
+    initialSelectedIndex?: number
 ) => {
     const [selectedProductIndex, setSelectedProductIndex] = useState(0);
     const [showDeepSearchView, setShowDeepSearchView] = useState(false);
@@ -29,10 +30,14 @@ export const useProductSelection = (
         if (hasSavedDeepSearchData || rankedProducts.length === 0) {
             // Always start with original items view when clicking different history items
             setShowDeepSearchView(false);
-            // Reset to first item when switching between different product groups
-            setSelectedProductIndex(0);
+            
+            // Use the initial selected index from extension data when it's available and valid
+            if (initialSelectedIndex !== undefined && initialSelectedIndex >= 0) {
+                console.log('[useProductSelection] Setting selectedProductIndex to:', initialSelectedIndex);
+                setSelectedProductIndex(initialSelectedIndex);
+            }
         }
-    }, [hasSavedDeepSearchData, rankedProducts.length]);
+    }, [hasSavedDeepSearchData, rankedProducts.length, initialSelectedIndex]);
 
     const handleProductSelect = (product: AmazonProduct, index: number) => {
         // If we're in deep search view and the product is clicked from RankingResults,

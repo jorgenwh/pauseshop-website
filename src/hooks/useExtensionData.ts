@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { getScreenshot } from '../lib/api';
 import { getExtensionData } from '../lib/browser-extensions';
 import { Product, AmazonProduct, ExtensionClickHistoryEntry } from '../lib/types';
-import { TEXT } from '../lib/constants';
+import { TEXT, CAROUSEL_CONFIG } from '../lib/constants';
 
 interface ExtensionDataState {
     imageUrl: string | null;
@@ -25,14 +25,44 @@ export const useExtensionData = () => {
         pauseId: null,
     });
 
+    // Helper function to find a product match within the carousel-limited products
+    const findProductMatch = (clickedProduct: AmazonProduct, carouselProducts: AmazonProduct[]): number => {
+        // First try to match by Amazon ASIN (most reliable)
+        if (clickedProduct.amazonAsin) {
+            const asinMatch = carouselProducts.findIndex(p => p.amazonAsin === clickedProduct.amazonAsin);
+            if (asinMatch !== -1) return asinMatch;
+        }
+
+        // Then try to match by ID
+        const idMatch = carouselProducts.findIndex(p => p.id === clickedProduct.id);
+        if (idMatch !== -1) return idMatch;
+
+        // Then try to match by thumbnail URL (in case IDs are different but content is same)
+        if (clickedProduct.thumbnailUrl) {
+            const thumbnailMatch = carouselProducts.findIndex(p => p.thumbnailUrl === clickedProduct.thumbnailUrl);
+            if (thumbnailMatch !== -1) return thumbnailMatch;
+        }
+
+        // Finally try to match by original position within the carousel limit
+        if (clickedProduct.position !== undefined && clickedProduct.position < CAROUSEL_CONFIG.itemLimit) {
+            const positionMatch = carouselProducts.findIndex(p => p.position === clickedProduct.position);
+            if (positionMatch !== -1) return positionMatch;
+        }
+
+        // No match found
+        return -1;
+    };
+
     const updateHistoryItem = async (item: ExtensionClickHistoryEntry) => {
         // Set the new product and amazon products
         const newProduct = item.productGroup.product;
         const newAmazonProducts = item.productGroup.scrapedProducts;
 
-        // Find the index of the originally clicked product from the history entry
-        const clickedIndex = newAmazonProducts.findIndex(p => p.id === item.clickedProduct.id);
+        // Find the index of the originally clicked product within the carousel-limited products
+        const carouselLimitedProducts = newAmazonProducts.slice(0, CAROUSEL_CONFIG.itemLimit);
+        const clickedIndex = findProductMatch(item.clickedProduct, carouselLimitedProducts);
         const newSelectedIndex = clickedIndex !== -1 ? clickedIndex : 0;
+        console.log('[useExtensionData updateHistoryItem] Found clicked product index:', clickedIndex, 'for product:', item.clickedProduct.id);
 
         // Update the pauseId
         const newPauseId = item.pauseId;
@@ -125,7 +155,11 @@ export const useExtensionData = () => {
             if (activeGroup) {
                 const mainProduct = activeGroup.product;
                 const activeAmazonProducts = activeGroup.scrapedProducts;
-                const clickedIndex = activeAmazonProducts.findIndex(p => p.id === clickedProduct.id);
+                
+                // Find the index within the carousel-limited products
+                const carouselLimitedProducts = activeAmazonProducts.slice(0, CAROUSEL_CONFIG.itemLimit);
+                const clickedIndex = findProductMatch(clickedProduct, carouselLimitedProducts);
+                console.log('[useExtensionData] Found clicked product index:', clickedIndex, 'for product:', clickedProduct.id);
 
                 // Set state together
                 setState(prev => ({

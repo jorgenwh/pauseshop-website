@@ -8,8 +8,8 @@ interface SeoProps {
 }
 
 export const Seo = ({ title, description, canonical, robots }: SeoProps) => {
-    const appTitle = 'PauseShop';
-    const appDescription = 'PauseShop helps you find products from images. Upload a photo and discover similar items from top retailers. Your intelligent shopping companion.';
+    const appTitle = 'FreezeFrame';
+    const appDescription = 'FreezeFrame helps you find products from images. Upload a photo and discover similar items from top retailers. Your intelligent shopping companion.';
     const siteUrl = 'https://pauseshop.net';
 
     const pageTitle = title ? `${title} | ${appTitle}` : appTitle;

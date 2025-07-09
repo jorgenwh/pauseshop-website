@@ -41,8 +41,8 @@ const AppHeader = ({ subtitle, className = "", showBrowserExtensionButton = true
                 </div>
             )}
             <h1 className="mb-2" style={{ fontSize: '50px', lineHeight: 1 }}>
-                <span className="font-black" style={{ color: 'rgba(190, 190, 190, 1)' }}>Pause</span>
-                <span className="font-normal" style={{ color: '#30B3A4' }}>Shop</span>
+                <span className="font-black" style={{ color: 'rgba(190, 190, 190, 1)' }}>Freeze</span>
+                <span className="font-normal" style={{ color: '#30B3A4' }}>Frame</span>
             </h1>
             {subtitle && (
                 <p className="text-gray-400 max-w-lg mx-auto">

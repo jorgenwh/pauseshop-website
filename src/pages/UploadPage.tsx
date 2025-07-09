@@ -54,7 +54,7 @@ const UploadPage = ({
         <div className="container mx-auto px-4 py-8 max-w-3xl">
             <Seo
                 title="Upload Image"
-                description="Upload an image to find similar products. PauseShop uses AI to analyze your photos and discover matching items from top retailers."
+                description="Upload an image to find similar products. FreezeFrame uses AI to analyze your photos and discover matching items from top retailers."
                 canonical="/"
                 robots="index, follow"
             />

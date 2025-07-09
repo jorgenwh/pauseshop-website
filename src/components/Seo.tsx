@@ -10,7 +10,7 @@ interface SeoProps {
 export const Seo = ({ title, description, canonical, robots }: SeoProps) => {
     const appTitle = 'FreezeFrame';
     const appDescription = 'FreezeFrame helps you find products from images. Upload a photo and discover similar items from top retailers. Your intelligent shopping companion.';
-    const siteUrl = 'https://pauseshop.net';
+    const siteUrl = 'https://freeze-frame.net';
 
     const pageTitle = title ? `${title} | ${appTitle}` : appTitle;
     const pageDescription = description || appDescription;

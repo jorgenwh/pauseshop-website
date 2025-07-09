@@ -49,7 +49,7 @@ export const CAROUSEL_CONFIG = {
 
 // App text content
 export const TEXT = {
-    appName: 'PauseShop',
+    appName: 'FreezeFrame',
     appDescription: 'Pause your favorite videos, upload a screenshot, and let AI find the products on Amazon for you!',
     uploadTitle: 'Upload an Image',
     dragDropText: 'Drag and drop an image, or click to browse',

@@ -49,7 +49,7 @@ export const getExtensionData = (): Promise<ExtensionData | null> => {
                     }
 
                     // Verify the response is from our extension
-                    if (response && response.app === 'PauseShop' && response.data) {
+                    if (response && response.app === 'FreezeFrame' && response.data) {
                         resolve(response.data);
                     } else {
                         console.warn(`Received an invalid response from extension ID: ${extensionId}.`);
@@ -94,7 +94,7 @@ export const updateExtensionClickHistory = (updatedHistory: ExtensionClickHistor
                         return;
                     }
 
-                    if (response && response.app === 'PauseShop' && response.success) {
+                    if (response && response.app === 'FreezeFrame' && response.success) {
                         resolve(true);
                     } else {
                         console.error('Failed to update extension click history:', response?.error || 'Unknown error');

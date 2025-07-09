@@ -93,4 +93,4 @@ export const TIPS = {
     ],
 };
 
-export const AMAZON_AFFILIATE_TAG = 'pauseshop07-20';
+export const AMAZON_AFFILIATE_TAG = 'freezeframe07-20';

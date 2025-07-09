@@ -1,7 +1,7 @@
-# PauseShop - AI-Powered Product Discovery from Video Screenshots
+# FreezeFrame - AI-Powered Product Discovery from Video Screenshots
 
 ## Project Overview
-PauseShop is a React-based web application that allows users to upload screenshots from videos and uses AI to identify products visible in the images, then helps them find those products on Amazon. The app is designed for users who see products in videos (YouTube, streaming services, etc.) and want to purchase them.
+FreezeFrame is a React-based web application that allows users to upload screenshots from videos and uses AI to identify products visible in the images, then helps them find those products on Amazon. The app is designed for users who see products in videos (YouTube, streaming services, etc.) and want to purchase them.
 
 ## Core Functionality
 - **Image Upload**: Users can drag-and-drop or browse to upload PNG/JPG images

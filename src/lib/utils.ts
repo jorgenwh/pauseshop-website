@@ -307,3 +307,11 @@ export const imageUrlToBase64 = (url: string): Promise<string> => {
 
 // Re-export deep search utilities
 export * from './utils/deepSearch';
+
+// Utility function for combining classes (needed for Aceternity UI components)
+import { ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}

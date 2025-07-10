@@ -58,7 +58,7 @@ const UploadPage = ({
                 canonical="/"
                 robots="index, follow"
             />
-            <AppHeader subtitle={TEXT.appDescription} className="mb-8" />
+            <AppHeader useAnimatedSubtitle={true} className="mb-8" />
 
             <Card className="mb-6">
                 <h2 className="text-xl font-semibold mb-4 text-white">{TEXT.uploadTitle}</h2>

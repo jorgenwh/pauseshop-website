@@ -6,3 +6,5 @@ export { default as Badge } from './Badge';
 export { default as Icon } from './Icon';
 export { default as KeyboardKey } from './KeyboardKey';
 export { default as EmptyState } from './EmptyState';
+export { default as AnimatedSubtitle } from './AnimatedSubtitle';
+export { FlipWords } from './flip-words';

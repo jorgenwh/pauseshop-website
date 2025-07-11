@@ -6,14 +6,16 @@ import { useEffect, useState } from 'react';
 import { BROWSER_EXTENSION_URLS } from '../../lib/browser-extensions';
 import Button from './Button';
 import Icon from './Icon';
+import AnimatedSubtitle from './AnimatedSubtitle';
 
 interface AppHeaderProps {
     subtitle?: string;
     className?: string;
     showBrowserExtensionButton?: boolean;
+    useAnimatedSubtitle?: boolean;
 }
 
-const AppHeader = ({ subtitle, className = "", showBrowserExtensionButton = true }: AppHeaderProps) => {
+const AppHeader = ({ subtitle, className = "", showBrowserExtensionButton = true, useAnimatedSubtitle = false }: AppHeaderProps) => {
     const [extensionUrl, setExtensionUrl] = useState<string | null>(null);
 
     useEffect(() => {
@@ -48,6 +50,9 @@ const AppHeader = ({ subtitle, className = "", showBrowserExtensionButton = true
                 <p className="text-gray-400 max-w-lg mx-auto">
                     {subtitle}
                 </p>
+            )}
+            {useAnimatedSubtitle && !subtitle && (
+                <AnimatedSubtitle />
             )}
         </div>
     );

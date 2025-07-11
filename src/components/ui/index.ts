@@ -8,3 +8,4 @@ export { default as KeyboardKey } from './KeyboardKey';
 export { default as EmptyState } from './EmptyState';
 export { default as AnimatedSubtitle } from './AnimatedSubtitle';
 export { FlipWords } from './flip-words';
+export { BackgroundBeams } from './background-beams';

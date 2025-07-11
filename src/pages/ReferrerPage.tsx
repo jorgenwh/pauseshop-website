@@ -4,7 +4,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { AppHeader } from '../components/ui';
+import { AppHeader, BackgroundBeams } from '../components/ui';
 import { ScreenshotSection, ProductDisplaySection, ProductCarouselSection } from '../components/sections';
 import { ExtensionClickHistoryEntry } from '../lib/types';
 import { updateExtensionClickHistory } from '../lib/browser-extensions';
@@ -200,7 +200,9 @@ const ReferrerPage = () => {
     };
 
     return (
-        <div className={`container mx-auto px-4 py-8 max-w-7xl transition-opacity duration-500 ${animateIn ? 'opacity-100' : 'opacity-0'}`}>
+        <div className="relative min-h-screen">
+            <BackgroundBeams />
+            <div className={`relative z-10 container mx-auto px-4 py-8 max-w-7xl transition-opacity duration-500 ${animateIn ? 'opacity-100' : 'opacity-0'}`}>
             <AppHeader className="mb-8" showBrowserExtensionButton={false} />
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -234,6 +236,7 @@ const ReferrerPage = () => {
                     buttonDimensions={buttonDimensions}
                 />
             </div>
+        </div>
         </div>
     );
 };

@@ -11,7 +11,7 @@ import { FileUpload, ImagePreview, TipsSection } from '../features/image-upload'
 
 // Import from shared components
 import { ErrorMessage } from '../components/feedback';
-import { ActionButtons, AppHeader, Card } from '../components/ui';
+import { ActionButtons, AppHeader, Card, BackgroundBeams } from '../components/ui';
 
 // Import constants
 import { TEXT } from '../lib/constants';
@@ -51,7 +51,9 @@ const UploadPage = ({
     };
 
     return (
-        <div className="container mx-auto px-4 py-8 max-w-3xl">
+        <div className="relative min-h-screen">
+            <BackgroundBeams />
+            <div className="relative z-10 container mx-auto px-4 py-8 max-w-3xl">
             <Seo
                 title="Upload Image"
                 description="Upload an image to find similar products. FreezeFrame uses AI to analyze your photos and discover matching items from top retailers."
@@ -82,6 +84,7 @@ const UploadPage = ({
             </Card>
 
             <ErrorMessage message={error} />
+            </div>
         </div>
     );
 };

@@ -14,7 +14,21 @@ const getBase64SizeMB = (base64String: string): number => {
 };
 
 /**
- * Smart format selection based on image characteristics
+ * Check browser support for modern image formats
+ */
+const checkFormatSupport = (): { webp: boolean; avif: boolean } => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1;
+    canvas.height = 1;
+    
+    const webpSupport = canvas.toDataURL('image/webp').startsWith('data:image/webp');
+    const avifSupport = canvas.toDataURL('image/avif').startsWith('data:image/avif');
+    
+    return { webp: webpSupport, avif: avifSupport };
+};
+
+/**
+ * Smart format selection based on image characteristics and browser support
  */
 const selectOptimalFormat = (img: HTMLImageElement): { format: string; quality: number } => {
     const canvas = document.createElement('canvas');
@@ -23,6 +37,9 @@ const selectOptimalFormat = (img: HTMLImageElement): { format: string; quality: 
     if (!ctx) {
         return { format: 'image/jpeg', quality: 0.8 };
     }
+    
+    // Check browser support for modern formats
+    const { webp, avif } = checkFormatSupport();
     
     // Sample a small portion of the image to analyze
     const sampleSize = 100;
@@ -54,15 +71,34 @@ const selectOptimalFormat = (img: HTMLImageElement): { format: string; quality: 
     
     colorVariance /= totalPixels;
     
-    // Select format based on characteristics
+    // Select format based on characteristics and browser support
     if (hasTransparency) {
-        return { format: 'image/png', quality: 1.0 };
+        // For transparency, prefer modern formats that support it with better compression
+        if (avif) {
+            return { format: 'image/avif', quality: 0.8 };
+        } else if (webp) {
+            return { format: 'image/webp', quality: 0.8 };
+        } else {
+            return { format: 'image/png', quality: 1.0 };
+        }
     } else if (colorVariance < 30) {
-        // Low color variance - PNG might be better
-        return { format: 'image/png', quality: 1.0 };
+        // Low color variance - modern formats can handle this well
+        if (avif) {
+            return { format: 'image/avif', quality: 0.75 };
+        } else if (webp) {
+            return { format: 'image/webp', quality: 0.75 };
+        } else {
+            return { format: 'image/png', quality: 1.0 };
+        }
     } else {
-        // High color variance - JPEG is better
-        return { format: 'image/jpeg', quality: 0.85 };
+        // High color variance - modern formats excel here
+        if (avif) {
+            return { format: 'image/avif', quality: 0.8 };
+        } else if (webp) {
+            return { format: 'image/webp', quality: 0.85 };
+        } else {
+            return { format: 'image/jpeg', quality: 0.85 };
+        }
     }
 };
 
@@ -76,8 +112,22 @@ const compressImageProgressive = (
     maxHeight = 2048
 ): string => {
     const canvas = document.createElement('canvas');
+    
+    // Get optimal format first to determine if we need alpha channel
+    const tempCanvas = document.createElement('canvas');
+    const tempCtx = tempCanvas.getContext('2d');
+    if (!tempCtx) {
+        throw new Error('Could not get temporary canvas context');
+    }
+    tempCanvas.width = 1;
+    tempCanvas.height = 1;
+    tempCtx.drawImage(img, 0, 0, 1, 1);
+    const { format: previewFormat } = selectOptimalFormat(img);
+    
+    // Configure canvas context based on format
+    const needsAlpha = previewFormat === 'image/png' || previewFormat === 'image/webp' || previewFormat === 'image/avif';
     const ctx = canvas.getContext('2d', { 
-        alpha: false, // Disable alpha channel for JPEG
+        alpha: needsAlpha,
         willReadFrequently: false // Optimize for single read
     });
     
@@ -111,18 +161,21 @@ const compressImageProgressive = (
     ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(img, 0, 0, width, height);
     
+    // Get optimal format for this image
+    const { format: optimalFormat, quality: baseQuality } = selectOptimalFormat(img);
+    
     // Binary search for optimal quality
     let minQuality = 0.1;
-    let maxQuality = 0.95;
+    let maxQuality = Math.min(0.95, baseQuality);
     let bestDataUrl = '';
     let bestSize = Infinity;
     
-    console.log(`🔍 Starting binary search compression (target: ${maxSizeMB}MB, dimensions: ${width}x${height})`);
+    console.log(`🔍 Starting binary search compression (target: ${maxSizeMB}MB, dimensions: ${width}x${height}, format: ${optimalFormat})`);
     
     // Limit iterations to prevent infinite loops
     for (let i = 0; i < 8; i++) {
         const quality = (minQuality + maxQuality) / 2;
-        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        const dataUrl = canvas.toDataURL(optimalFormat, quality);
         const size = getBase64SizeMB(dataUrl);
         
         console.log(`  🎯 Iteration ${i + 1}: quality=${quality.toFixed(2)}, size=${size.toFixed(2)}MB`);
@@ -154,7 +207,7 @@ const compressImageProgressive = (
         canvas.width = newWidth;
         canvas.height = newHeight;
         ctx.drawImage(img, 0, 0, newWidth, newHeight);
-        bestDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        bestDataUrl = canvas.toDataURL(optimalFormat, 0.8);
         
         console.log(`  📦 Final size after dimension reduction: ${getBase64SizeMB(bestDataUrl).toFixed(2)}MB`);
     }
@@ -203,11 +256,17 @@ export const convertImageToBase64 = (
                             const finalSizeMB = getBase64SizeMB(dataUrl);
                             
                             if (finalSizeMB <= maxSizeMB) {
-                                console.log(`📸 Image processed (no compression needed):
+                                const compressionRatio = fileSizeMB / finalSizeMB;
+                                const sizeReduction = ((fileSizeMB - finalSizeMB) / fileSizeMB) * 100;
+                                
+                                console.log(`📸 Image processed (format optimization):
                                   📁 Original: ${fileSizeMB.toFixed(2)}MB
                                   📦 Final: ${finalSizeMB.toFixed(2)}MB
                                   🎯 Format: ${format}
-                                  ⚡ Quality: ${quality}`);
+                                  ⚡ Quality: ${quality}
+                                  📊 Compression: ${compressionRatio.toFixed(1)}x smaller
+                                  📉 Size reduction: ${sizeReduction.toFixed(1)}%`);
+                                
                                 resolve(dataUrl);
                                 return;
                             }
@@ -252,12 +311,18 @@ export const convertImageToBase64 = (
 };
 
 /**
- * Validates if a file is an allowed image type (PNG or JPG/JPEG)
+ * Validates if a file is an allowed image type (PNG, JPG/JPEG, WebP, AVIF)
  * @param file The file to validate
  * @returns Boolean indicating if the file is a valid image type
  */
 export const isImageFile = (file: File): boolean => {
-    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+    const allowedTypes = [
+        'image/png',
+        'image/jpeg',
+        'image/jpg',
+        'image/webp',
+        'image/avif'
+    ];
     return allowedTypes.includes(file.type);
 };
 

@@ -120,7 +120,7 @@ export const useImageProcessing = (): UseImageProcessingReturn => {
                     
                     switch(error.type) {
                         case 'image_error':
-                            errorMessage = `Image Error: The image format is not valid. Please make sure you're uploading a supported image format (PNG, JPG, JPEG, WebP).`;
+                            errorMessage = `Image Error: The image format is not valid. Please make sure you're uploading a supported image format (PNG, JPG, JPEG, WebP, AVIF).`;
                             break;
                         case 'processing_error':
                             errorMessage = `Processing Error: There was a problem analyzing your image. Please try again with a clearer image.`;

@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import UploadPage from './pages/UploadPage';
 import ResultsPage from './pages/ResultsPage';
 import ReferrerPage from './pages/ReferrerPage';
+import ExtensionRedirect from './pages/ExtensionRedirect';
 import { useImageProcessing } from './features/image-upload';
 
 const App = () => {
@@ -48,6 +49,12 @@ const App = () => {
                             path="/referrer"
                             element={
                                 <ReferrerPage />
+                            }
+                        />
+                        <Route
+                            path="/extension"
+                            element={
+                                <ExtensionRedirect />
                             }
                         />
                         <Route path="*" element={<Navigate to="/" replace />} />

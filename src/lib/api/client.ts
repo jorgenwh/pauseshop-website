@@ -158,6 +158,25 @@ export const analyzeImageStreaming = async (
 };
 
 /**
+ * Track website visit
+ */
+export const trackWebsiteVisit = async (): Promise<void> => {
+    const url = getEndpointUrl('/statistics/website-visit');
+    
+    try {
+        await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+    } catch (error) {
+        // Silently fail - we don't want statistics tracking to break the app
+        console.debug('Failed to track website visit:', error);
+    }
+};
+
+/**
  * Fetches a screenshot from the server using a session ID
  */
 export const getScreenshot = async (sessionId: string): Promise<string | null> => {

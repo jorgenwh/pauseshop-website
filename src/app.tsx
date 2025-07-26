@@ -1,9 +1,11 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import UploadPage from './pages/UploadPage';
 import ResultsPage from './pages/ResultsPage';
 import ReferrerPage from './pages/ReferrerPage';
 import ExtensionRedirect from './pages/ExtensionRedirect';
 import { useImageProcessing } from './features/image-upload';
+import { trackWebsiteVisit } from './lib/api/client';
 
 const App = () => {
     const {
@@ -16,6 +18,11 @@ const App = () => {
         processImage,
         reset
     } = useImageProcessing();
+    
+    // Track website visit on mount
+    useEffect(() => {
+        trackWebsiteVisit();
+    }, []);
 
     return (
         <div className="min-h-screen bg-gray-900 text-gray-100">

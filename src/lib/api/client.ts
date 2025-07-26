@@ -177,6 +177,63 @@ export const trackWebsiteVisit = async (): Promise<void> => {
 };
 
 /**
+ * Track clicked Amazon link
+ */
+export const trackClickedAmazonLink = async (): Promise<void> => {
+    const url = getEndpointUrl('/statistics/clickedAmazonLink');
+    
+    try {
+        await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+    } catch (error) {
+        // Silently fail - we don't want statistics tracking to break the app
+        console.debug('Failed to track Amazon link click:', error);
+    }
+};
+
+/**
+ * Track extension redirect button click
+ */
+export const trackExtensionRedirect = async (): Promise<void> => {
+    const url = getEndpointUrl('/statistics/extensionRedirect');
+    
+    try {
+        await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+    } catch (error) {
+        // Silently fail - we don't want statistics tracking to break the app
+        console.debug('Failed to track extension redirect:', error);
+    }
+};
+
+/**
+ * Track extension redirect page visit
+ */
+export const trackExtensionRedirectPage = async (): Promise<void> => {
+    const url = getEndpointUrl('/statistics/extensionRedirectPage');
+    
+    try {
+        await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+    } catch (error) {
+        // Silently fail - we don't want statistics tracking to break the app
+        console.debug('Failed to track extension redirect page:', error);
+    }
+};
+
+/**
  * Fetches a screenshot from the server using a session ID
  */
 export const getScreenshot = async (sessionId: string): Promise<string | null> => {

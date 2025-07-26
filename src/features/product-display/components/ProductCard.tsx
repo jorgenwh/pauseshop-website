@@ -5,6 +5,7 @@ import { Product } from '../../../lib/types';
 import { constructAmazonSearchUrl } from '../../../lib/utils';
 import { TEXT } from '../../../lib/constants';
 import { Badge, Icon } from '../../../components/ui';
+import { trackClickedAmazonLink } from '../../../lib/api/client';
 
 interface ProductCardProps {
     product: Product;
@@ -41,6 +42,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-[#30B3A4] hover:text-[#30B3A4]/80 font-medium flex items-center"
+                    onClick={() => trackClickedAmazonLink()}
                 >
                     <Icon name="external-link" className="mr-1" size={16} />
                     {TEXT.amazonLinkText}

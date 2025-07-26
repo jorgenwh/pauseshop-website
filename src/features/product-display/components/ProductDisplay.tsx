@@ -5,6 +5,7 @@
 import { AmazonProduct, Product } from '../../../lib/types';
 import { Card } from '../../../components/ui';
 import { AMAZON_AFFILIATE_TAG } from '../../../lib/constants';
+import { trackClickedAmazonLink } from '../../../lib/api/client';
 
 interface ProductDisplayProps {
     product?: Product;
@@ -77,6 +78,7 @@ const ProductDisplay = ({ product, amazonProduct }: ProductDisplayProps) => {
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold py-2 px-4 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 text-base max-w-xs leading-tight"
+                            onClick={() => trackClickedAmazonLink()}
                         >
                             <span className="flex-1 text-center">Check price on Amazon</span>
                             <svg className="ml-2 w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

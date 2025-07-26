@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { cn } from "@/lib/utils";
 
@@ -14,20 +14,30 @@ export const FlipWords = ({
 }) => {
   const [currentWord, setCurrentWord] = useState(words[0]);
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
+  const wordsRef = useRef(words);
+  const currentWordRef = useRef(currentWord);
 
-  // thanks for the fix Julian - https://github.com/Julian-AT lol wtf who is Julian?
-  const startAnimation = useCallback(() => {
-    const word = words[words.indexOf(currentWord) + 1] || words[0];
-    setCurrentWord(word);
-    setIsAnimating(true);
-  }, [currentWord, words]);
+  // Update refs when props change
+  useEffect(() => {
+    wordsRef.current = words;
+  }, [words]);
 
   useEffect(() => {
-    if (!isAnimating)
-      setTimeout(() => {
-        startAnimation();
+    currentWordRef.current = currentWord;
+  }, [currentWord]);
+
+  useEffect(() => {
+    if (!isAnimating) {
+      const timeoutId = setTimeout(() => {
+        const currentIndex = wordsRef.current.indexOf(currentWordRef.current);
+        const nextWord = wordsRef.current[currentIndex + 1] || wordsRef.current[0];
+        setCurrentWord(nextWord);
+        setIsAnimating(true);
       }, duration);
-  }, [isAnimating, duration, startAnimation]);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [isAnimating, duration]);
 
   return (
     <AnimatePresence
@@ -56,6 +66,9 @@ export const FlipWords = ({
           filter: "blur(8px)",
           scale: 2,
           position: "absolute",
+          transition: {
+            duration: 1,
+          },
         }}
         className={cn(
           "z-10 inline-block relative text-left text-neutral-900 dark:text-neutral-100 px-2",

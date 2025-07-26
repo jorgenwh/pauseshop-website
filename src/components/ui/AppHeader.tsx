@@ -4,6 +4,7 @@
 
 import { useEffect, useState } from 'react';
 import { BROWSER_EXTENSION_URLS } from '../../lib/browser-extensions';
+import { trackExtensionRedirect } from '../../lib/api/client';
 import Button from './Button';
 import Icon from './Icon';
 import AnimatedSubtitle from './AnimatedSubtitle';
@@ -29,7 +30,10 @@ const AppHeader = ({ subtitle, className = "", showBrowserExtensionButton = true
                     <Button
                         variant="extension"
                         size="sm"
-                        onClick={() => window.open(extensionUrl, '_blank')}
+                        onClick={() => {
+                            trackExtensionRedirect();
+                            window.open(extensionUrl, '_blank');
+                        }}
                         className="leading-tight !p-2 !text-xs"
                     >
                         <div className="flex items-center gap-2">

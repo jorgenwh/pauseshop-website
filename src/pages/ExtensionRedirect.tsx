@@ -1,8 +1,12 @@
 import { useEffect } from 'react';
 import { BROWSER_EXTENSION_URLS } from '@/lib/browser-extensions';
+import { trackExtensionRedirectPage } from '@/lib/api/client';
 
 const ExtensionRedirect = () => {
     useEffect(() => {
+        // Track the page visit
+        trackExtensionRedirectPage();
+        
         const extensionUrl = BROWSER_EXTENSION_URLS.chrome;
         if (extensionUrl) {
             window.location.href = extensionUrl;
